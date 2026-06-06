@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASOCIACIÓN VIVIENDA TALLER SANTA MARÍA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            scroll-behavior: smooth;
+        }
+
+        header {
+            text-align: center;
+            margin: 24px 0;
+            color: #1e293b;
+        }
+
+        header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        header p {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .contador {
+            font-size: 15px;
+            color: #334155;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-azul { background: #2563eb; color: white; }
+        .btn-azul:hover { background: #1d4ed8; }
+
+        .btn-gris { background: #64748b; color: white; }
+        .btn-gris:hover { background: #475569; }
+
+        .btn-verde { background: #10b981; color: white; }
+        .btn-verde:hover { background: #059669; }
+
+        .busqueda {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 24px 0;
+        }
+
+        .campo {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .campo label {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #334155;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+            transform: translateY(-2px);
+            transition: transform 0.2s ease;
+        }
+
+        .botones-busqueda {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .contacto {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-left: 8px solid;
+        }
+
+        .encabezado {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #0f172a;
+        }
+
+        .nombre {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #1e293b;
+        }
+
+        .dato {
+            font-size: 16px;
+            margin: 6px 0;
+            color: #475569;
+        }
+
+        .enlace-tel {
+            color: #2563eb;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            margin: 6px 0;
+        }
+
+        .enlace-wa {
+            color: #16a34a;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            margin: 6px 0 6px 16px;
+        }
+
+        .botones-accion {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .btn-editar {
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background: #e2e8f0;
+            color: #1e293b;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-eliminar {
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background: #ef4444;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .vacio {
+            text-align: center;
+            padding: 50px 20px;
+            color: #94a3b8;
+            font-size: 17px;
+        }
+
+        .mensaje {
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+        .exito { background: #dcfce7; color: #166534; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📇 ASOCIACIÓN VIVIENDA TALLER SANTA MARÍA</h1>
+            <p>Mauricio - Premium v5.1</p>
+            <p class="contador">📋 Total de socios registrados: <strong id="contadorTotal">0</strong></p>
+        </header>
+
+        <div class="card">
+            <button class="btn btn-azul" onclick="mostrarFormularioNuevo()">➕ Agregar Nuevo</button>
+            
+            <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="cargarArchivo(event)">
+            <button class="btn btn-gris" onclick="document.getElementById('fileInput').click()">📂 Cargar Archivo</button>
+            
+            <button class="btn btn-verde" onclick="descargarRespaldo()">💾 Descargar Respaldo</button>
+
+            <div class="busqueda">
+                <div class="campo">
+                    <label>Manzana</label>
+                    <input type="text" id="m" placeholder="Ej: A, B, C">
+                </div>
+                <div class="campo">
+                    <label>Lote</label>
+                    <input type="text" id="l" placeholder="Ej: 4, 9-A, 12">
+                </div>
+            </div>
+
+            <div class="botones-busqueda">
+                <button class="btn btn-azul" onclick="buscar()">Buscar</button>
+                <button class="btn btn-verde" onclick="verLista()">Ver Todos</button>
+            </div>
+
+            <div id="mensaje" class="mensaje exito"></div>
+        </div>
+
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        let socios = [];
+        const mapaColores = {'A':'#FF5733','B':'#28a745','C':'#3357FF','D':'#E91E63','E':'#FFC107','F':'#8E44AD','G':'#F39C12','H':'#795548','I':'#00BCD4','J':'#D81B60','K':'#8BC34A','L':'#5E35B1','M':'#C62828','N':'#00695C'};
+
+        function actualizarContador() {
+            document.getElementById('contadorTotal').textContent = socios.length;
+        }
+
+        function mostrarMensaje(texto) {
+            const msg = document.getElementById('mensaje');
+            msg.textContent = texto;
+            msg.style.display = 'block';
+            setTimeout(() => { msg.style.display = 'none'; }, 2000);
+        }
+
+        function ajustarVista() {
+            setTimeout(() => {
+                const activo = document.activeElement;
+                if (activo.tagName === 'INPUT') {
+                    activo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 300);
+        }
+
+        function iniciar() {
+            const guardado = localStorage.getItem('misSocios');
+            if (guardado) {
+                socios = JSON.parse(guardado);
+                ordenarSocios();
+                verLista();
+                actualizarContador();
+            } else {
+                document.getElementById('resultado').innerHTML = "<div class='vacio'>No hay datos. Carga tu archivo para empezar.</div>";
+                actualizarContador();
+            }
+        }
+
+        function cargarArchivo(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    socios = JSON.parse(e.target.result);
+                    ordenarSocios();
+                    localStorage.setItem('misSocios', JSON.stringify(socios));
+                    verLista();
+                    actualizarContador();
+                    mostrarMensaje('Archivo cargado correctamente');
+                } catch (error) {
+                    alert("❌ Error: El archivo no es válido");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function verLista() {
+            const cont = document.getElementById('resultado');
+            cont.innerHTML = "";
+            document.getElementById('m').value = '';
+            document.getElementById('l').value = '';
+            
+            if (socios.length === 0) {
+                cont.innerHTML = "<div class='vacio'>No hay registros guardados.</div>";
+                return;
+            }
+            socios.forEach((s, i) => renderSocio(s, i, cont));
+        }
+
+        function renderSocio(s, i, cont) {
+            const color = mapaColores[s.m.toUpperCase()] || '#cbd5e1';
+            const telLink = (s.t && s.t !== '-') ? `<a href="tel:${s.t}" class="enlace-tel">📞 ${s.t}</a>` : "<span class='dato'>Teléfono: -</span>";
+            const waLink = (s.t && s.t !== '-') ? `<a href="https://wa.me/${s.t}" target="_blank" class="enlace-wa">💬 WhatsApp</a>` : "";
+            
+            cont.innerHTML += `
+            <div class='contacto' style='border-left-color: ${color};'>
+                <div class='encabezado'>Manzana ${s.m} • Lote ${s.l}</div>
+                <div class='nombre'>${s.n}</div>
+                <div class='dato'>DNI: ${s.dni || "Sin DNI"}</div>
+                <div>${telLink} ${waLink}</div>
+                <div class='botones-accion'>
+                    <button class="btn-editar" onclick="mostrarEditor(${i})">✏️ Editar</button>
+                    <button class="btn-eliminar" onclick="eliminarSocio(${i})">🗑️ Eliminar</button>
+                </div>
+            </div>`;
+        }
+
+        // 👇 BÚSQUEDA CORREGIDA: empieza por lo que escribes, sin importar mayúsculas
+        function buscar() {
+            const textoManzana = document.getElementById('m').value.trim().toLowerCase();
+            const textoLote = document.getElementById('l').value.trim().toLowerCase();
+            const cont = document.getElementById('resultado');
+            
+            if (!textoManzana && !textoLote) {
+                alert("⚠️ Ingresa al menos Manzana o Lote para buscar");
+                return;
+            }
+
+            cont.innerHTML = "";
+            let encontrado = false;
+            
+            socios.forEach((s, i) => {
+                const manzanaGuardada = s.m.toLowerCase();
+                const loteGuardado = s.l.toLowerCase();
+
+                // Ahora busca SOLO si EMPIEZA por el texto que escribiste
+                const coincideManzana = !textoManzana || manzanaGuardada.startsWith(textoManzana);
+                const coincideLote = !textoLote || loteGuardado.startsWith(textoLote);
+
+                if (coincideManzana && coincideLote) {
+                    renderSocio(s, i, cont);
+                    encontrado = true;
+                }
+            });
+
+            if (!encontrado) {
+                cont.innerHTML = "<div class='vacio'>No se encontraron registros</div>";
+            }
+        }
+
+        function mostrarFormularioNuevo() {
+            document.getElementById('resultado').innerHTML = `
+            <div class="card">
+                <h3 style="margin-bottom: 16px; color: #1e293b;">Agregar Nuevo Contacto</h3>
+                <input type="text" id="nuevo_m" placeholder="Manzana" onfocus="ajustarVista()">
+                <input type="text" id="nuevo_l" placeholder="Lote" required onfocus="ajustarVista()">
+                <input type="text" id="nuevo_n" placeholder="Nombre completo" required onfocus="ajustarVista()">
+                <input type="text" id="nuevo_dni" placeholder="DNI" onfocus="ajustarVista()">
+                <input type="text" id="nuevo_t" placeholder="Teléfono" onfocus="ajustarVista()">
+                <div class="botones-accion" style="margin-top: 16px;">
+                    <button class="btn btn-verde" onclick="guardarNuevo()">Guardar</button>
+                    <button class="btn btn-gris" onclick="verLista()">Cancelar</button>
+                </div>
+            </div>`;
+        }
+
+        function guardarNuevo() {
+            const nuevoSocio = {
+                m: document.getElementById('nuevo_m').value.toUpperCase().trim(),
+                l: document.getElementById('nuevo_l').value.trim(),
+                n: document.getElementById('nuevo_n').value.trim(),
+                dni: document.getElementById('nuevo_dni').value.trim(),
+                t: document.getElementById('nuevo_t').value.trim() || '-'
+            };
+            if (!nuevoSocio.m || !nuevoSocio.l || !nuevoSocio.n) {
+                alert("❌ Faltan datos obligatorios: Manzana, Lote y Nombre");
+                return;
+            }
+            socios.push(nuevoSocio);
+            ordenarSocios();
+            localStorage.setItem('misSocios', JSON.stringify(socios));
+            verLista();
+            actualizarContador();
+            mostrarMensaje('✅ Contacto agregado correctamente');
+        }
+
+        function mostrarEditor(i) {
+            const s = socios[i];
+            document.getElementById('resultado').innerHTML = `
+            <div class="card">
+                <h3 style="margin-bottom: 16px; color: #1e293b;">Editar Contacto</h3>
+                <input type="text" id="edit_m" value="${s.m}" onfocus="ajustarVista()">
+                <input type="text" id="edit_l" value="${s.l}" onfocus="ajustarVista()">
+                <input type="text" id="edit_n" value="${s.n}" onfocus="ajustarVista()">
+                <input type="text" id="edit_dni" value="${s.dni || ''}" onfocus="ajustarVista()">
+                <input type="text" id="edit_t" value="${s.t}" onfocus="ajustarVista()">
+                <div class="botones-accion" style="margin-top: 16px;">
+                    <button class="btn btn-verde" onclick="guardar(${i})">Guardar Cambios</button>
+                    <button class="btn btn-gris" onclick="verLista()">Cancelar</button>
+                </div>
+            </div>`;
+        }
+
+        function guardar(i) {
+            socios[i].m = document.getElementById('edit_m').value.toUpperCase().trim();
+            socios[i].l = document.getElementById('edit_l').value.trim();
+            socios[i].n = document.getElementById('edit_n').value.trim();
+            socios[i].dni = document.getElementById('edit_dni').value.trim();
+            socios[i].t = document.getElementById('edit_t').value.trim() || '-';
+            ordenarSocios();
+            localStorage.setItem('misSocios', JSON.stringify(socios));
+            verLista();
+            mostrarMensaje('✅ Cambios guardados correctamente');
+        }
+
+        function eliminarSocio(i) {
+            if (confirm("⚠️ ¿Estás seguro de eliminar este registro? Esta acción no se puede deshacer")) {
+                socios.splice(i, 1);
+                ordenarSocios();
+                localStorage.setItem('misSocios', JSON.stringify(socios));
+                verLista();
+                actualizarContador();
+                mostrarMensaje('🗑️ Registro eliminado correctamente');
+            }
+        }
+
+        function descargarRespaldo() {
+            if (socios.length === 0) {
+                alert("❌ No hay datos para descargar");
+                return;
+            }
+            const blob = new Blob([JSON.stringify(socios, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "ASOCIACION_SANTA_MARIA.json";
+            a.click();
+            mostrarMensaje('💾 Respaldo descargado correctamente');
+        }
+
+        function ordenarSocios() {
+            if (!socios || socios.length === 0) return;
+            socios.sort((a, b) => {
+                let manA = (a.m || "").toUpperCase();
+                let manB = (b.m || "").toUpperCase();
+                if (manA !== manB) return manA.localeCompare(manB);
+                let lotA = (a.l || "").toString();
+                let lotB = (b.l || "").toString();
+                return lotA.localeCompare(lotB, undefined, { numeric: true, sensitivity: 'base' });
+            });
+        }
+
+        iniciar();
+    </script>
+</body>
+</html>
