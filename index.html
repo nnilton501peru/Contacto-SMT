@@ -3,26 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Prueba Contactos</title>
+<title>Gestor Socios Santa María</title>
 <style>
   body{font-family:Arial,sans-serif;background:#f2f4f7;margin:0;padding:16px}
-  .box{max-width:420px;margin:auto;background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px #0002}
-  h2{margin-top:0}
+  .box{max-width:450px;margin:auto;background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px #0002}
+  h2{margin-top:0;font-size:20px;text-align:center;color:#1a73e8}
   input,button{width:100%;box-sizing:border-box;padding:12px;margin-top:10px;font-size:16px;border-radius:8px;border:1px solid #bbb}
-  button{border:none;color:#fff;background:#1a73e8}
+  button{border:none;color:#fff;background:#1a73e8;cursor:pointer;font-weight:bold}
   button:disabled{background:#9ab}
   #guardar{background:#188038}
-  #msg{margin-top:14px;padding:10px;border-radius:8px;background:#eef;font-size:14px;min-height:20px}
+  #msg{margin-top:14px;padding:10px;border-radius:8px;background:#eef;font-size:14px;min-height:20px;word-break:break-word}
+  .resultado{margin-top:10px;padding:10px;background:#f8f9fa;border-radius:8px;border:1px solid #ddd;font-size:14px;max-height:150px;overflow-y:auto}
 </style>
 </head>
 <body>
 <div class="box">
-  <h2>Prueba: guardar contacto</h2>
+  <h2>Socios Santa María</h2>
   <button id="conectar" disabled>Cargando Google...</button>
-  <input id="nombre" placeholder="Nombre">
+  
+  <hr style="margin:16px 0;border:0;border-top:1px solid #ddd">
+  
+  <h3>Buscar Socio</h3>
+  <input id="buscarManzana" placeholder="Manzana (ej. A)">
+  <input id="buscarLote" placeholder="Lote (ej. 1)" inputmode="numeric">
+  <button id="btnBuscar" disabled>Buscar Socio</button>
+  <div id="resultadoBusqueda" class="resultado" style="display:none;"></div>
+
+  <hr style="margin:16px 0;border:0;border-top:1px solid #ddd">
+
+  <h3>Registrar / Guardar</h3>
+  <input id="nombre" placeholder="Nombre completo">
   <input id="telefono" placeholder="Teléfono" inputmode="tel">
   <button id="guardar" disabled>Guardar en la hoja</button>
-  <div id="msg">Esperando...</div>
+  
+  <div id="msg">Esperando conexión...</div>
 </div>
 
 <script>
@@ -33,6 +47,7 @@ const SCOPE     = 'https://www.googleapis.com/auth/spreadsheets';
 let tokenClient = null;
 let accessToken = null;
 let vence = 0;
+let cacheSocios = [];
 
 const $ = id => document.getElementById(id);
 const msg = t => $('msg').textContent = t;
@@ -40,11 +55,12 @@ const msg = t => $('msg').textContent = t;
 function tokenValido(){ return accessToken && Date.now() < vence; }
 
 function actualizarBotones(){
-  $('guardar').disabled = !tokenValido();
-  $('conectar').textContent = tokenValido() ? 'Conectado ✔ (tocar para reconectar)' : 'Conectar con Google';
+  const valido = tokenValido();
+  $('guardar').disabled = !valido;
+  $('btnBuscar').disabled = !valido;
+  $('conectar').textContent = valido ? 'Conectado ✔ (Tocar para reconectar)' : 'Conectar con Google';
 }
 
-// Se llama cuando carga la librería de Google
 function iniciarGoogle(){
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
@@ -53,47 +69,80 @@ function iniciarGoogle(){
       if (resp.error) { msg('Error de Google: ' + resp.error); return; }
       accessToken = resp.access_token;
       vence = Date.now() + (resp.expires_in - 60) * 1000;
-      msg('Conectado. Ya puedes guardar.');
+      msg('Conectado correctamente.');
       actualizarBotones();
+      cargarSocios();
     },
     error_callback: (err) => {
-      if (err.type === 'popup_failed_to_open') msg('El navegador bloqueó la ventana. Toca otra vez el botón.');
-      else if (err.type === 'popup_closed') msg('Cerraste la ventana de Google.');
+      if (err.type === 'popup_failed_to_open') msg('El navegador bloqueó la ventana. Toca otra vez.');
+      else if (err.type === 'popup_closed') msg('Cerraste la ventana de sesión.');
       else msg('Error: ' + (err.type || 'desconocido'));
     }
   });
   $('conectar').disabled = false;
   $('conectar').textContent = 'Conectar con Google';
-  msg('Toca "Conectar con Google".');
+  msg('Toca "Conectar con Google" para empezar.');
 }
 
-// El login SOLO se abre con un toque del usuario
 $('conectar').addEventListener('click', () => {
   if (!tokenClient) return;
   tokenClient.requestAccessToken({ prompt: tokenValido() ? '' : 'select_account' });
+});
+
+async function cargarSocios() {
+  if (!tokenValido()) return;
+  try {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A1:E250`;
+    const r = await fetch(url, {
+      headers: { 'Authorization': 'Bearer ' + accessToken }
+    });
+    const data = await r.json();
+    if (data.values) {
+      cacheSocios = data.values.slice(1); // Omite el encabezado
+      msg(`✔ Datos cargados (${cacheSocios.length} registros).`);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+$('btnBuscar').addEventListener('click', () => {
+  const m = $('buscarManzana').value.trim().toUpperCase();
+  const l = $('buscarLote').value.trim();
+  const resDiv = $('resultadoBusqueda');
+  
+  if (!m || !l) { alert('Ingresa Manzana y Lote'); return; }
+  
+  const encontrado = cacheSocios.find(row => row[0] && row[0].trim().toUpperCase() === m && row[1] && row[1].trim() === l);
+  
+  resDiv.style.display = 'block';
+  if (encontrado) {
+    resDiv.innerHTML = `<b>Mza:</b> ${encontrado[0]} | <b>Lote:</b> ${encontrado[1]}<br><b>Nombre:</b> ${encontrado[2] || 'Sin nombre'}<br><b>Tel:</b> ${encontrado[4] || 'Sin teléfono'}`;
+  } else {
+    resDiv.innerHTML = 'No se encontró socio en esa Manzana y Lote.';
+  }
 });
 
 $('guardar').addEventListener('click', async () => {
   const nombre = $('nombre').value.trim();
   const telefono = $('telefono').value.trim();
   if (!nombre || !telefono) { msg('Escribe nombre y teléfono.'); return; }
-  if (!tokenValido()) { msg('La sesión venció. Toca "Conectar con Google".'); actualizarBotones(); return; }
+  if (!tokenValido()) { msg('La sesión venció. Conecta otra vez.'); actualizarBotones(); return; }
 
   $('guardar').disabled = true;
   msg('Guardando...');
   try {
-    const url = 'https://sheets.googleapis.com/v4/spreadsheets/' + SHEET_ID +
-      '/values/A:C:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS';
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A:C:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
     const r = await fetch(url, {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
       body: JSON.stringify({ values: [[new Date().toLocaleString('es-PE'), nombre, telefono]] })
     });
-    if (r.status === 401) { accessToken = null; msg('La sesión venció. Toca "Conectar con Google".'); }
-    else if (!r.ok) { const e = await r.json(); msg('Error ' + r.status + ': ' + (e.error && e.error.message || '')); }
-    else { msg('✔ Guardado en la hoja.'); $('nombre').value = ''; $('telefono').value = ''; }
+    if (r.status === 401) { accessToken = null; msg('La sesión venció.'); }
+    else if (!r.ok) { const e = await r.json(); msg('Error: ' + (e.error?.message || '')); }
+    else { msg('✔ Guardado con éxito en la hoja.'); $('nombre').value = ''; $('telefono').value = ''; cargarSocios(); }
   } catch (e) {
-    msg('Error de conexión: ' + e.message);
+    msg('Error de red: ' + e.message);
   }
   actualizarBotones();
 });
