@@ -1,152 +1,535 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gestor Socios Santa María</title>
-<style>
-  body{font-family:Arial,sans-serif;background:#f2f4f7;margin:0;padding:16px}
-  .box{max-width:450px;margin:auto;background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px #0002}
-  h2{margin-top:0;font-size:20px;text-align:center;color:#1a73e8}
-  input,button{width:100%;box-sizing:border-box;padding:12px;margin-top:10px;font-size:16px;border-radius:8px;border:1px solid #bbb}
-  button{border:none;color:#fff;background:#1a73e8;cursor:pointer;font-weight:bold}
-  button:disabled{background:#9ab}
-  #guardar{background:#188038}
-  #msg{margin-top:14px;padding:10px;border-radius:8px;background:#eef;font-size:14px;min-height:20px;word-break:break-word}
-  .resultado{margin-top:10px;padding:10px;background:#f8f9fa;border-radius:8px;border:1px solid #ddd;font-size:14px;max-height:150px;overflow-y:auto}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASOCIACIÓN VIVIENDA TALLER SANTA MARÍA - v5.2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            scroll-behavior: smooth;
+        }
+
+        header {
+            text-align: center;
+            margin: 24px 0;
+            color: #1e293b;
+        }
+
+        header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        header p {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .contador {
+            font-size: 15px;
+            color: #334155;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-azul { background: #2563eb; color: white; }
+        .btn-azul:hover { background: #1d4ed8; }
+
+        .btn-gris { background: #64748b; color: white; }
+        .btn-gris:hover { background: #475569; }
+
+        .btn-verde { background: #10b981; color: white; }
+        .btn-verde:hover { background: #059669; }
+
+        .btn:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        .busqueda {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin: 24px 0;
+        }
+
+        .campo {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .campo label {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #334155;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+            transform: translateY(-2px);
+            transition: transform 0.2s ease;
+        }
+
+        .botones-busqueda {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .contacto {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-left: 8px solid;
+        }
+
+        .encabezado {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #0f172a;
+        }
+
+        .nombre {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #1e293b;
+        }
+
+        .dato {
+            font-size: 16px;
+            margin: 6px 0;
+            color: #475569;
+        }
+
+        .enlace-tel {
+            color: #2563eb;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            margin: 6px 0;
+        }
+
+        .enlace-wa {
+            color: #16a34a;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            margin: 6px 0 6px 16px;
+        }
+
+        .botones-accion {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .btn-editar {
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background: #e2e8f0;
+            color: #1e293b;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-eliminar {
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background: #ef4444;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .vacio {
+            text-align: center;
+            padding: 50px 20px;
+            color: #94a3b8;
+            font-size: 17px;
+        }
+
+        .mensaje {
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+        .exito { background: #dcfce7; color: #166534; }
+        .error { background: #fee2e2; color: #991b1b; }
+    </style>
 </head>
 <body>
-<div class="box">
-  <h2>Socios Santa María</h2>
-  <button id="conectar" disabled>Cargando Google...</button>
-  
-  <hr style="margin:16px 0;border:0;border-top:1px solid #ddd">
-  
-  <h3>Buscar Socio</h3>
-  <input id="buscarManzana" placeholder="Manzana (ej. A)">
-  <input id="buscarLote" placeholder="Lote (ej. 1)" inputmode="numeric">
-  <button id="btnBuscar" disabled>Buscar Socio</button>
-  <div id="resultadoBusqueda" class="resultado" style="display:none;"></div>
+    <div class="container">
+        <header>
+            <h1>📇 ASOCIACIÓN VIVIENDA TALLER SANTA MARÍA</h1>
+            <p>Mauricio - Premium v5.2 (Google Sheets)</p>
+            <p class="contador">📋 Total de socios registrados: <strong id="contadorTotal">0</strong></p>
+        </header>
 
-  <hr style="margin:16px 0;border:0;border-top:1px solid #ddd">
+        <div class="card">
+            <!-- Botón de Conexión Google -->
+            <button id="btnConectar" class="btn btn-gris" disabled>Cargando Google...</button>
 
-  <h3>Registrar / Guardar</h3>
-  <input id="nombre" placeholder="Nombre completo">
-  <input id="telefono" placeholder="Teléfono" inputmode="tel">
-  <button id="guardar" disabled>Guardar en la hoja</button>
-  
-  <div id="msg">Esperando conexión...</div>
-</div>
+            <button class="btn btn-azul" onclick="mostrarFormularioNuevo()" id="btnNuevo" style="display:none;">➕ Agregar Nuevo</button>
+            <button class="btn btn-verde" onclick="descargarRespaldo()" id="btnRespaldo" style="display:none;">💾 Descargar Respaldo</button>
 
-<script>
-const CLIENT_ID = '954568750819-am04it2kt0pb8oiiijilcgdoo8nptuu7.apps.googleusercontent.com';
-const SHEET_ID  = '1DbCMAN9ja3AdSLbexTH8cGxuYGpwSJ33MbfAtHNyIEQ';
-const SCOPE     = 'https://www.googleapis.com/auth/spreadsheets';
+            <div class="busqueda">
+                <div class="campo">
+                    <label>Manzana</label>
+                    <input type="text" id="m" placeholder="Ej: A, B, C">
+                </div>
+                <div class="campo">
+                    <label>Lote</label>
+                    <input type="text" id="l" placeholder="Ej: 4, 9-A, 12">
+                </div>
+            </div>
 
-let tokenClient = null;
-let accessToken = null;
-let vence = 0;
-let cacheSocios = [];
+            <div class="botones-busqueda">
+                <button class="btn btn-azul" onclick="buscar()">Buscar</button>
+                <button class="btn btn-verde" onclick="verLista()">Ver Todos</button>
+            </div>
 
-const $ = id => document.getElementById(id);
-const msg = t => $('msg').textContent = t;
+            <div id="mensaje" class="mensaje"></div>
+        </div>
 
-function tokenValido(){ return accessToken && Date.now() < vence; }
+        <div id="resultado"></div>
+    </div>
 
-function actualizarBotones(){
-  const valido = tokenValido();
-  $('guardar').disabled = !valido;
-  $('btnBuscar').disabled = !valido;
-  $('conectar').textContent = valido ? 'Conectado ✔ (Tocar para reconectar)' : 'Conectar con Google';
-}
+    <script>
+        const CLIENT_ID = '954568750819-am04it2kt0pb8oiiijilcgdoo8nptuu7.apps.googleusercontent.com';
+        const SHEET_ID  = '1DbCMAN9ja3AdSLbexTH8cGxuYGpwSJ33MbfAtHNyIEQ';
+        const SCOPE     = 'https://www.googleapis.com/auth/spreadsheets';
 
-function iniciarGoogle(){
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID,
-    scope: SCOPE,
-    callback: (resp) => {
-      if (resp.error) { msg('Error de Google: ' + resp.error); return; }
-      accessToken = resp.access_token;
-      vence = Date.now() + (resp.expires_in - 60) * 1000;
-      msg('Conectado correctamente.');
-      actualizarBotones();
-      cargarSocios();
-    },
-    error_callback: (err) => {
-      if (err.type === 'popup_failed_to_open') msg('El navegador bloqueó la ventana. Toca otra vez.');
-      else if (err.type === 'popup_closed') msg('Cerraste la ventana de sesión.');
-      else msg('Error: ' + (err.type || 'desconocido'));
-    }
-  });
-  $('conectar').disabled = false;
-  $('conectar').textContent = 'Conectar con Google';
-  msg('Toca "Conectar con Google" para empezar.');
-}
+        let tokenClient = null;
+        let accessToken = null;
+        let vence = 0;
+        let socios = [];
+        
+        const mapaColores = {'A':'#FF5733','B':'#28a745','C':'#3357FF','D':'#E91E63','E':'#FFC107','F':'#8E44AD','G':'#F39C12','H':'#795548','I':'#00BCD4','J':'#D81B60','K':'#8BC34A','L':'#5E35B1','M':'#C62828','N':'#00695C'};
 
-$('conectar').addEventListener('click', () => {
-  if (!tokenClient) return;
-  tokenClient.requestAccessToken({ prompt: tokenValido() ? '' : 'select_account' });
-});
+        function tokenValido() { 
+            return accessToken && Date.now() < vence; 
+        }
 
-async function cargarSocios() {
-  if (!tokenValido()) return;
-  try {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A1:E250`;
-    const r = await fetch(url, {
-      headers: { 'Authorization': 'Bearer ' + accessToken }
-    });
-    const data = await r.json();
-    if (data.values) {
-      cacheSocios = data.values.slice(1); // Omite el encabezado
-      msg(`✔ Datos cargados (${cacheSocios.length} registros).`);
-    }
-  } catch (e) {
-    console.error(e);
-  }
-}
+        function actualizarEstadoConexion() {
+            const btn = document.getElementById('btnConectar');
+            if (tokenValido()) {
+                btn.textContent = 'Conectado a Google ✔ (Tocar para reconectar)';
+                btn.className = 'btn btn-verde';
+                document.getElementById('btnNuevo').style.display = 'block';
+                document.getElementById('btnRespaldo').style.display = 'block';
+            } else {
+                btn.textContent = 'Conectar con Google';
+                btn.className = 'btn btn-azul';
+            }
+        }
 
-$('btnBuscar').addEventListener('click', () => {
-  const m = $('buscarManzana').value.trim().toUpperCase();
-  const l = $('buscarLote').value.trim();
-  const resDiv = $('resultadoBusqueda');
-  
-  if (!m || !l) { alert('Ingresa Manzana y Lote'); return; }
-  
-  const encontrado = cacheSocios.find(row => row[0] && row[0].trim().toUpperCase() === m && row[1] && row[1].trim() === l);
-  
-  resDiv.style.display = 'block';
-  if (encontrado) {
-    resDiv.innerHTML = `<b>Mza:</b> ${encontrado[0]} | <b>Lote:</b> ${encontrado[1]}<br><b>Nombre:</b> ${encontrado[2] || 'Sin nombre'}<br><b>Tel:</b> ${encontrado[4] || 'Sin teléfono'}`;
-  } else {
-    resDiv.innerHTML = 'No se encontró socio en esa Manzana y Lote.';
-  }
-});
+        function iniciarGoogle() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPE,
+                callback: (resp) => {
+                    if (resp.error) { 
+                        mostrarMensaje('Error de Google: ' + resp.error, 'error'); 
+                        return; 
+                    }
+                    accessToken = resp.access_token;
+                    vence = Date.now() + (resp.expires_in - 60) * 1000;
+                    actualizarEstadoConexion();
+                    mostrarMensaje('✅ Conectado correctamente. Cargando datos...', 'exito');
+                    cargarSociosDesdeGoogle();
+                },
+                error_callback: (err) => {
+                    if (err.type === 'popup_failed_to_open') mostrarMensaje('El navegador bloqueó la ventana.', 'error');
+                    else if (err.type === 'popup_closed') mostrarMensaje('Cerraste la ventana de sesión.', 'error');
+                    else mostrarMensaje('Error de autenticación.', 'error');
+                }
+            });
+            document.getElementById('btnConectar').disabled = false;
+            document.getElementById('btnConectar').textContent = 'Conectar con Google';
+            mostrarMensaje('Toca "Conectar con Google" para empezar.', 'exito');
+        }
 
-$('guardar').addEventListener('click', async () => {
-  const nombre = $('nombre').value.trim();
-  const telefono = $('telefono').value.trim();
-  if (!nombre || !telefono) { msg('Escribe nombre y teléfono.'); return; }
-  if (!tokenValido()) { msg('La sesión venció. Conecta otra vez.'); actualizarBotones(); return; }
+        document.getElementById('btnConectar').addEventListener('click', () => {
+            if (!tokenClient) return;
+            tokenClient.requestAccessToken({ prompt: tokenValido() ? '' : 'select_account' });
+        });
 
-  $('guardar').disabled = true;
-  msg('Guardando...');
-  try {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A:C:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
-    const r = await fetch(url, {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ values: [[new Date().toLocaleString('es-PE'), nombre, telefono]] })
-    });
-    if (r.status === 401) { accessToken = null; msg('La sesión venció.'); }
-    else if (!r.ok) { const e = await r.json(); msg('Error: ' + (e.error?.message || '')); }
-    else { msg('✔ Guardado con éxito en la hoja.'); $('nombre').value = ''; $('telefono').value = ''; cargarSocios(); }
-  } catch (e) {
-    msg('Error de red: ' + e.message);
-  }
-  actualizarBotones();
-});
-</script>
-<script src="https://accounts.google.com/gsi/client" async defer onload="iniciarGoogle()"></script>
-</body>
-</html>
+        async function cargarSociosDesdeGoogle() {
+            if (!tokenValido()) {
+                mostrarMensaje('La sesión expiró. Conecta otra vez.', 'error');
+                actualizarEstadoConexion();
+                return;
+            }
+
+            try {
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A1:E250`;
+                const r = await fetch(url, {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                
+                if (!r.ok) {
+                    throw new Error('No se pudo leer la hoja de cálculo');
+                }
+
+                const data = await r.json();
+                if (data.values) {
+                    // Omitimos la fila de encabezados (fila 1) y mapeamos a las variables de la app
+                    const filas = data.values.slice(1);
+                    socios = filas.map(row => ({
+                        m: (row[0] || '').trim(),
+                        l: (row[1] || '').trim(),
+                        n: (row[2] || '').trim(),
+                        dni: (row[3] || '').trim(),
+                        t: (row[4] || '').trim() || '-'
+                    })).filter(s => s.m && s.n); // Filtrar filas vacías
+
+                    ordenarSocios();
+                    verLista();
+                    actualizarContador();
+                    mostrarMensaje(`✔ Datos sincronizados (${socios.length} registros).`, 'exito');
+                }
+            } catch (e) {
+                mostrarMensaje('❌ Error al cargar datos: ' + e.message, 'error');
+            }
+        }
+
+        function actualizarContador() {
+            document.getElementById('contadorTotal').textContent = socios.length;
+        }
+
+        function mostrarMensaje(texto, tipo = 'exito') {
+            const msg = document.getElementById('mensaje');
+            msg.textContent = texto;
+            msg.className = 'mensaje ' + tipo;
+            msg.style.display = 'block';
+            setTimeout(() => { msg.style.display = 'none'; }, 3000);
+        }
+
+        function ajustarVista() {
+            setTimeout(() => {
+                const activo = document.activeElement;
+                if (activo.tagName === 'INPUT') {
+                    activo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 300);
+        }
+
+        function verLista() {
+            const cont = document.getElementById('resultado');
+            cont.innerHTML = "";
+            document.getElementById('m').value = '';
+            document.getElementById('l').value = '';
+            
+            if (socios.length === 0) {
+                cont.innerHTML = "<div class='vacio'>No hay registros cargados. Conecta con Google para ver la lista.</div>";
+                return;
+            }
+            socios.forEach((s, i) => renderSocio(s, i, cont));
+        }
+
+        function renderSocio(s, i, cont) {
+            const color = mapaColores[(s.m || '').toUpperCase()] || '#cbd5e1';
+            const telLink = (s.t && s.t !== '-') ? `<a href="tel:${s.t}" class="enlace-tel">📞 ${s.t}</a>` : "<span class='dato'>Teléfono: -</span>";
+            const waLink = (s.t && s.t !== '-') ? `<a href="https://wa.me/${s.t}" target="_blank" class="enlace-wa">💬 WhatsApp</a>` : "";
+            
+            cont.innerHTML += `
+            <div class='contacto' style='border-left-color: ${color};'>
+                <div class='encabezado'>Manzana ${s.m} • Lote ${s.l}</div>
+                <div class='nombre'>${s.n}</div>
+                <div class='dato'>DNI: ${s.dni || "Sin DNI"}</div>
+                <div>${telLink} ${waLink}</div>
+                <div class='botones-accion'>
+                    <button class="btn-editar" onclick="mostrarEditor(${i})">✏️ Ver / Editar</button>
+                    <button class="btn-eliminar" onclick="avisoEdicionNube()">🗑️ Google Sheets</button>
+                </div>
+            </div>`;
+        }
+
+        function avisoEdicionNube() {
+            alert("ℹ️ Para mantener la integridad de la base de datos oficial, las eliminaciones y modificaciones masivas se gestionan directamente desde tu Hoja de Cálculo.");
+        }
+
+        function buscar() {
+            const textoManzana = document.getElementById('m').value.trim().toLowerCase();
+            const textoLote = document.getElementById('l').value.trim().toLowerCase();
+            const cont = document.getElementById('resultado');
+            
+            if (!textoManzana && !textoLote) {
+                alert("⚠️ Ingresa al menos Manzana o Lote para buscar");
+                return;
+            }
+
+            cont.innerHTML = "";
+            let encontrado = false;
+            
+            socios.forEach((s, i) => {
+                const manzanaGuardada = s.m.toLowerCase();
+                const loteGuardado = s.l.toLowerCase();
+
+                const coincideManzana = !textoManzana || manzanaGuardada.startsWith(textoManzana);
+                const coincideLote = !textoLote || loteGuardado.startsWith(textoLote);
+
+                if (coincideManzana && coincideLote) {
+                    renderSocio(s, i, cont);
+                    encontrado = true;
+                }
+            });
+
+            if (!encontrado) {
+                cont.innerHTML = "<div class='vacio'>No se encontraron registros</div>";
+            }
+        }
+
+        function mostrarFormularioNuevo() {
+            if (!tokenValido()) {
+                alert("⚠️ Debes conectar con Google primero.");
+                return;
+            }
+            document.getElementById('resultado').innerHTML = `
+            <div class="card">
+                <h3 style="margin-bottom: 16px; color: #1e293b;">Agregar Nuevo Socio a la Hoja</h3>
+                <input type="text" id="nuevo_m" placeholder="Manzana (Ej: A)" onfocus="ajustarVista()">
+                <input type="text" id="nuevo_l" placeholder="Lote (Ej: 4)" required onfocus="ajustarVista()">
+                <input type="text" id="nuevo_n" placeholder="Nombre completo" required onfocus="ajustarVista()">
+                <input type="text" id="nuevo_dni" placeholder="DNI" onfocus="ajustarVista()">
+                <input type="text" id="nuevo_t" placeholder="Teléfono" onfocus="ajustarVista()">
+                <div class="botones-accion" style="margin-top: 16px;">
+                    <button class="btn btn-verde" onclick="guardarNuevoEnGoogle()">Guardar en la Hoja</button>
+                    <button class="btn btn-gris" onclick="verLista()">Cancelar</button>
+                </div>
+            </div>`;
+        }
+
+        async function guardarNuevoEnGoogle() {
+            const m = document.getElementById('nuevo_m').value.toUpperCase().trim();
+            const l = document.getElementById('nuevo_l').value.trim();
+            const n = document.getElementById('nuevo_n').value.trim();
+            const dni = document.getElementById('nuevo_dni').value.trim();
+            const t = document.getElementById('nuevo_t').value.trim() || '';
+
+            if (!m || !l || !n) {
+                alert("❌ Faltan datos obligatorios: Manzana, Lote y Nombre");
+                return;
+            }
+
+            if (!tokenValido()) {
+                mostrarMensaje('La sesión venció. Conecta otra vez.', 'error');
+                actualizarEstadoConexion();
+                return;
+            }
+
+            mostrarMensaje('Guardando en Google Sheets...', 'exito');
+
+            try {
+                // Orden de columnas en tu hoja: A=Manzana, B=Lote, C=Nombre, D=DNI, E=Teléfono[span_2](start_span)[span_2](end_span)
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A:E:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+                const r = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ values: [[m, l, n, dni, t]] })
+                });
+
+                if (!r.ok) {
+                    throw new Error('Error al registrar en la nube');
+                }
+
+                mostrarMensaje('✔ Guardado con éxito en la hoja.', 'exito');
+                cargarSociosDesdeGoogle(); // Recarga automática de la lista actualizada
+            } catch (e) {
+                mostrarMensaje('Error de red: ' + e.message, 'error');
+            }
+        }
+
+        function mostrarEditor(i) {
+            const s = socios[i];
+            document.getElementById('resultado').innerHTML = `
+            <div class="card">
+                <h3 style="margin-bottom: 16px; color: #1e293b;">Detalle del Socio</h3>
+                <div class="campo"><label>Manzana</label><input type="text" value="${s.m}" disabled></div>
+                <div class="campo"><label>Lote</label><input type="text" value="${s.l}" disabled></div>
+                <div class="campo"><label>Nombre</label><input type="text" value="${s.n}" disabled></div>
+                <div class="campo"><label>DNI</label><input type="text" value="${s.dni || ''}" disabled></div>
+                <div class="campo"><label>Teléfono</label><input type="text" value="${s.t}" disabled></div>
+                <p style="font-size:13px; color:#64748b; margin-top:12px; text-align:center;">💡 Los cambios y actualizaciones directas se realizan en tu Google Sheet.</p>
+                <div class="botones-accion" style="margin-top: 16px;">
+                    <button class="btn btn-gris" onclick="verLista()">Volver a la Lista</button>
+                </div>
+            </div>`;
+        }
+
+        function descargarRespaldo() {
+            if (socios.length === 0) {
+                alert("❌ No hay datos para descargar");
+                return;
+            }
+            const blob = new Blob([JSON.stringify(socios, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "ASOCIACION_SANTA_MARIA_RESPALDO.json";
+            a.click();
+            mostrarMensaje('💾 Respaldo descargado correctamente', 'exito');
+        }
+
+        function ordenarSocios() {
+            if (!socios || socios.length === 0) return;
+            socios.sort((a, b) => {
+                let manA = (
