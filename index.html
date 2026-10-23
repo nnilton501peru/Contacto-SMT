@@ -1,381 +1,103 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASOCIACIÓN VIVIENDA TALLER SANTA MARÍA</title>
-    <!-- Librería oficial de Google Identity Services -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-        }
-
-        body {
-            background-color: #f0f4f8;
-            padding: 16px;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-            scroll-behavior: smooth;
-        }
-
-        header {
-            text-align: center;
-            margin: 24px 0;
-            color: #1e293b;
-        }
-
-        header h1 {
-            font-size: 22px;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-
-        header p {
-            font-size: 14px;
-            color: #64748b;
-            margin-top: 4px;
-        }
-
-        .contador {
-            font-size: 15px;
-            color: #334155;
-            margin-top: 8px;
-            font-weight: 500;
-        }
-
-        .card {
-            background: white;
-            border-radius: 14px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
-        }
-
-        .btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            font-size: 17px;
-            font-weight: 600;
-            margin-bottom: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-azul { background: #2563eb; color: white; }
-        .btn-azul:hover { background: #1d4ed8; }
-
-        .btn-gris { background: #64748b; color: white; }
-        .btn-gris:hover { background: #475569; }
-
-        .btn-verde { background: #10b981; color: white; }
-        .btn-verde:hover { background: #059669; }
-
-        .busqueda {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
-            margin: 24px 0;
-        }
-
-        .campo {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .campo label {
-            font-size: 16px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #334155;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 14px 16px;
-            font-size: 16px;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            background: #f8fafc;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-            transform: translateY(-2px);
-            transition: transform 0.2s ease;
-        }
-
-        .botones-busqueda {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .contacto {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            border-left: 8px solid;
-        }
-
-        .encabezado {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: #0f172a;
-        }
-
-        .nombre {
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #1e293b;
-        }
-
-        .dato {
-            font-size: 16px;
-            margin: 6px 0;
-            color: #475569;
-        }
-
-        .enlace-tel {
-            color: #2563eb;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-block;
-            margin: 6px 0;
-        }
-
-        .enlace-wa {
-            color: #16a34a;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-block;
-            margin: 6px 0 6px 16px;
-        }
-
-        .botones-accion {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 14px;
-        }
-
-        .btn-editar {
-            padding: 12px;
-            font-size: 16px;
-            border: none;
-            border-radius: 8px;
-            background: #e2e8f0;
-            color: #1e293b;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .btn-eliminar {
-            padding: 12px;
-            font-size: 16px;
-            border: none;
-            border-radius: 8px;
-            background: #ef4444;
-            color: white;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .vacio {
-            text-align: center;
-            padding: 50px 20px;
-            color: #94a3b8;
-            font-size: 17px;
-        }
-
-        .mensaje {
-            padding: 12px;
-            margin: 12px 0;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: 500;
-            display: none;
-        }
-        .exito { background: #dcfce7; color: #166534; }
-
-        /* Estilos para el panel de diagnóstico de Google */
-        #diag-box {
-            display: none;
-            background: #fce8e6;
-            border: 1px solid #ea4335;
-            color: #c5221f;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            margin-bottom: 15px;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-        #status-msg {
-            text-align: center;
-            font-weight: bold;
-            margin: 10px 0;
-            font-size: 0.95rem;
-            color: #334155;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba Contactos</title>
+<style>
+  body{font-family:Arial,sans-serif;background:#f2f4f7;margin:0;padding:16px}
+  .box{max-width:420px;margin:auto;background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px #0002}
+  h2{margin-top:0}
+  input,button{width:100%;box-sizing:border-box;padding:12px;margin-top:10px;font-size:16px;border-radius:8px;border:1px solid #bbb}
+  button{border:none;color:#fff;background:#1a73e8}
+  button:disabled{background:#9ab}
+  #guardar{background:#188038}
+  #msg{margin-top:14px;padding:10px;border-radius:8px;background:#eef;font-size:14px;min-height:20px}
+</style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>📇 ASOCIACIÓN VIVIENDA TALLER SANTA MARÍA</h1>
-            <p>Mauricio - Premium v8.1 (Google Sheets)</p>
-            <p class="contador">📋 Total de socios registrados: <strong id="contadorTotal">0</strong></p>
-        </header>
+<div class="box">
+  <h2>Prueba: guardar contacto</h2>
+  <button id="conectar" disabled>Cargando Google...</button>
+  <input id="nombre" placeholder="Nombre">
+  <input id="telefono" placeholder="Teléfono" inputmode="tel">
+  <button id="guardar" disabled>Guardar en la hoja</button>
+  <div id="msg">Esperando...</div>
+</div>
 
-        <!-- Panel de Diagnóstico y Conexión Google -->
-        <div class="card">
-            <div id="diag-box"></div>
-            
-            <div style="margin-bottom: 14px;">
-                <label for="client-id-input" style="font-weight: 600; display: block; margin-bottom: 6px; color: #334155;">Google Client ID:</label>
-                <input type="text" id="client-id-input" placeholder="Pega tu Client ID aquí...">
-                <button class="btn btn-azul" style="margin-top: 10px; margin-bottom: 0;" onclick="guardarClientIdManual()">💾 Guardar Client ID</button>
-            </div>
+<script>
+const CLIENT_ID = '954568750819-am04it2kt0pb8oiiijilcgdoo8nptuu7.apps.googleusercontent.com';
+const SHEET_ID  = '1DbCMAN9ja3AdSLbexTH8cGxuYGpwSJ33MbfAtHNyIEQ';
+const SCOPE     = 'https://www.googleapis.com/auth/spreadsheets';
 
-            <div id="status-msg">Estado: Esperando Client ID...</div>
-            <button id="btn-login" class="btn btn-azul" style="display:none; margin-bottom: 8px;" onclick="iniciarSesiónManual()">🔐 Iniciar Sesión con Google</button>
-            <button id="btn-test" class="btn btn-verde" style="display:none; margin-bottom: 0;" onclick="probarConexionSheets()">📊 Probar Conexión con Sheets</button>
-        </div>
+let tokenClient = null;
+let accessToken = null;
+let vence = 0;
 
-        <div class="card">
-            <button class="btn btn-azul" onclick="mostrarFormularioNuevo()">➕ Agregar Nuevo</button>
-            
-            <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="cargarArchivo(event)">
-            <button class="btn btn-gris" onclick="document.getElementById('fileInput').click()">📂 Cargar Archivo</button>
-            
-            <button class="btn btn-verde" onclick="descargarRespaldo()">💾 Descargar Respaldo</button>
+const $ = id => document.getElementById(id);
+const msg = t => $('msg').textContent = t;
 
-            <div class="busqueda">
-                <div class="campo">
-                    <label>Manzana</label>
-                    <input type="text" id="m" placeholder="Ej: A, B, C">
-                </div>
-                <div class="campo">
-                    <label>Lote</label>
-                    <input type="text" id="l" placeholder="Ej: 4, 9-A, 12">
-                </div>
-            </div>
+function tokenValido(){ return accessToken && Date.now() < vence; }
 
-            <div class="botones-busqueda">
-                <button class="btn btn-azul" onclick="buscar()">Buscar</button>
-                <button class="btn btn-verde" onclick="verLista()">Ver Todos</button>
-            </div>
+function actualizarBotones(){
+  $('guardar').disabled = !tokenValido();
+  $('conectar').textContent = tokenValido() ? 'Conectado ✔ (tocar para reconectar)' : 'Conectar con Google';
+}
 
-            <div id="mensaje" class="mensaje exito"></div>
-        </div>
+// Se llama cuando carga la librería de Google
+function iniciarGoogle(){
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPE,
+    callback: (resp) => {
+      if (resp.error) { msg('Error de Google: ' + resp.error); return; }
+      accessToken = resp.access_token;
+      vence = Date.now() + (resp.expires_in - 60) * 1000;
+      msg('Conectado. Ya puedes guardar.');
+      actualizarBotones();
+    },
+    error_callback: (err) => {
+      if (err.type === 'popup_failed_to_open') msg('El navegador bloqueó la ventana. Toca otra vez el botón.');
+      else if (err.type === 'popup_closed') msg('Cerraste la ventana de Google.');
+      else msg('Error: ' + (err.type || 'desconocido'));
+    }
+  });
+  $('conectar').disabled = false;
+  $('conectar').textContent = 'Conectar con Google';
+  msg('Toca "Conectar con Google".');
+}
 
-        <div id="resultado"></div>
-    </div>
+// El login SOLO se abre con un toque del usuario
+$('conectar').addEventListener('click', () => {
+  if (!tokenClient) return;
+  tokenClient.requestAccessToken({ prompt: tokenValido() ? '' : 'select_account' });
+});
 
-    <script>
-        // Padrón por defecto integrado con tus 91 registros iniciales
-        const datosIniciales = [
-          { "m": "A", "l": "1", "n": "NEFRAIN FELIX MUCHO MAMANI", "t": "-957941154", "dni": "" },
-          { "m": "A", "l": "2", "n": "CRISTINA MARIA CONDEMAYTA HUALPA", "t": "-952028008", "dni": "" },
-          { "m": "A", "l": "3", "n": "ARNALDO HUANACUNI LAYME", "t": "-994591384", "dni": "" },
-          { "m": "A", "l": "4", "n": "AGREPINO VILLANUEVA PARI", "t": "975228880", "dni": "" },
-          { "m": "A", "l": "5", "n": "HILDA CHINO ROMERO", "t": "-952817124", "dni": "" },
-          { "m": "A", "l": "6", "n": "FREDDY CACHICATARI ANCALLA", "t": "-944469996", "dni": "" },
-          { "m": "A", "l": "7", "n": "HEIDE HELEN TICONA TICONA", "t": "+51951212307", "dni": "" },
-          { "m": "A", "l": "8", "n": "DINA AROCUTIPA QUENTA", "t": "952662220", "dni": "" },
-          { "m": "A", "l": "9", "n": "INES ROSA CHOQUE ALVAREZ", "t": "936182915", "dni": "" },
-          { "m": "A", "l": "10", "n": "ISMAEL LEONCIO TORRES TORRES", "t": "951751835", "dni": "" },
-          { "m": "A", "l": "11", "n": "ALFREDO CHINO ROMERO", "t": "981794142", "dni": "" },
-          { "m": "B", "l": "1", "n": "NAZARIO MAMANI MACHACA", "t": "-" },
-          { "m": "B", "l": "2", "n": "TOMAS DARWIN TEVES MAMANI", "t": "-" },
-          { "m": "B", "l": "3", "n": "BETSI RIVADENEIRA PONCE", "t": "-" },
-          { "m": "B", "l": "4", "n": "NICOLAS BENITO MAMANI MAMANI", "t": "-" },
-          { "m": "B", "l": "5", "n": "CELIA BITALIA MAMANI MAMANI", "t": "-" },
-          { "m": "B", "l": "6", "n": "CECILIO MAURO MAMANI MAMANI", "t": "-" },
-          { "m": "B", "l": "7", "n": "JULIA MARTINA MAMANI MAMANI", "t": "-" },
-          { "m": "B", "l": "8", "n": "EVELYN PATRICIA ARAMAYO COAQUIRA", "t": "-" },
-          { "m": "B", "l": "9", "n": "ANTONIA AYCA", "t": "-" },
-          { "m": "B", "l": "10", "n": "EMILIO ALBERTO VELASQUEZ VELASQUEZ", "t": "-" },
-          { "m": "B", "l": "11", "n": "RODOLFO RAMIREZ VELASQUEZ", "t": "-" },
-          { "m": "B", "l": "12", "n": "RENE MARCA RAMOS", "t": "-" },
-          { "m": "B", "l": "13", "n": "SILVIA BERMEJO CASTILLO", "t": "-" },
-          { "m": "C", "l": "1", "n": "COORPORACION SAMEX /SAMUEL EMILIO GUTIERREZ CACHICATARI", "t": "-" },
-          { "m": "C", "l": "2", "n": "CELSO MONASTERIO POMA", "t": "-" },
-          { "m": "C", "l": "3", "n": "DAVID LORENZO TINTAYA MAMANI", "t": "-" },
-          { "m": "C", "l": "4", "n": "JUANA SOSA CASTRO VDA DE CACERES", "t": "-" },
-          { "m": "C", "l": "5", "n": "RENATO DANIEL FLORES TINTAYA", "t": "-" },
-          { "m": "C", "l": "6", "n": "JUANA QUISPE CCOPA", "t": "-" },
-          { "m": "C", "l": "7", "n": "ERICK RODRIGO ZANGA MAMANI", "t": "-" },
-          { "m": "C", "l": "8", "n": "VICTOR HUALPA HUERTA - PEDRO HUALPA ANCCO", "t": "-" },
-          { "m": "C", "l": "9", "n": "ANDRES QUISPE ARRATIA (SOLEDAD VILMA UCHARICO AGUILAR)", "t": "-" },
-          { "m": "C", "l": "10", "n": "YESENIA LAYME QUISPE", "t": "-" },
-          { "m": "C", "l": "11", "n": "LIDIA ESPINAL DE LAURENTE", "t": "-" },
-          { "m": "C", "l": "12", "n": "FRANCISCO ALTAMIRANO PAYE", "t": "-" },
-          { "m": "C", "l": "13", "n": "WILFREDO CHURA CALISAYA", "t": "-" },
-          { "m": "C", "l": "14", "n": "RUDDY VLADIMIR MAYDANA QUISPE", "t": "-" },
-          { "m": "C", "l": "15", "n": "ARTEMIO QUISPE MAMANI", "t": "-" },
-          { "m": "C", "l": "16", "n": "SONIA LAURA QUISPE", "t": "-" },
-          { "m": "C", "l": "17", "n": "HILDA MARINA ANQUISE LAYME (WILLIAM LEYVA PANDURO)", "t": "-" },
-          { "m": "C", "l": "18", "n": "ANGELICA LUZ MARQUINA CAHUANA", "t": "-" },
-          { "m": "C", "l": "19", "n": "TEODOCIA MAMANI FLORES", "t": "-" },
-          { "m": "C", "l": "20", "n": "MARIO CACERES ARRATIA", "t": "-" },
-          { "m": "D", "l": "1", "n": "GRIMANESA RIOS PINEDO", "t": "-" },
-          { "m": "D", "l": "2", "n": "LINO CALAPUJA HUMILLAURE", "t": "-" },
-          { "m": "D", "l": "3", "n": "NINFA ELIZABETH PRIETO RAMIREZ", "t": "-" },
-          { "m": "D", "l": "4", "n": "JHONY GELBERTH FLORES MONASTERIO", "t": "-" },
-          { "m": "D", "l": "5", "n": "FLORENCIO MARON CONDORI", "t": "-" },
-          { "m": "D", "l": "6", "n": "CRITERIA OTEMIA LLAMPAZO CASTILLO", "t": "-" },
-          { "m": "D", "l": "7", "n": "LEORGIA LAYME SANTOS", "t": "-" },
-          { "m": "D", "l": "8", "n": "WILLY REYNALDO SURCO ALFEREZ", "t": "-" },
-          { "m": "D", "l": "9-A", "n": "ABRAHAM ALBERTO MENDOZA FLORES", "t": "-" },
-          { "m": "D", "l": "9-B", "n": "VILMA VELASQUEZ MINAYA", "t": "-" },
-          { "m": "D", "l": "10", "n": "J.R.Z. S.A.C. (FELIPE JESUS ZANGA ROSAS)", "t": "-" },
-          { "m": "D", "l": "11", "n": "YONATHAN ALBERTO TOMASINI TITO MACHACA", "t": "-" },
-          { "m": "D", "l": "12", "n": "JULIAN CHACHAQUE CHAMBILLA", "t": "-" },
-          { "m": "D", "l": "13", "n": "NESTOR LAYME HUANACUNI", "t": "-" },
-          { "m": "D", "l": "14", "n": "ASELINA QUISPE MAMANI", "t": "-" },
-          { "m": "D", "l": "15", "n": "WILBER LAYME SANTOS", "t": "-" },
-          { "m": "D", "l": "16", "n": "GERARDO LEYVA CONDORI", "t": "-" },
-          { "m": "D", "l": "17", "n": "OSCAR FERNANDEZ AGUILAR", "t": "-" },
-          { "m": "D", "l": "18", "n": "PATRICIA QUISPE MAMANI", "t": "-" },
-          { "m": "D", "l": "19", "n": "BERNARDINO URIBE CUTIPA", "t": "-" },
-          { "m": "E", "l": "1", "n": "BUENAVENTURA UGARTE MAMANI", "t": "-" },
-          { "m": "E", "l": "2", "n": "JUDITH AROCUTIPA QUENTA", "t": "-" },
-          { "m": "E", "l": "3", "n": "EDWIN JUAN MAMANI FLORES (NUEVO)", "t": "-" },
-          { "m": "E", "l": "4", "n": "MARTHA QUISPE CHUI", "t": "-" },
-          { "m": "E", "l": "5", "n": "EDILBERTO CHAMBI ROSA", "t": "-" },
-          { "m": "E", "l": "6", "n": "GLARA E.I.R.L. (RENAN PEDRO AYMA CRUZ)", "t": "-" },
-          { "m": "E", "l": "7", "n": "FELIX EDGAR MAMANI FLORES", "t": "-" },
-          { "m": "E", "l": "8", "n": "JULIO CHAMBI CHAMBI", "t": "-" },
-          { "m": "E", "l": "9", "n": "RENE CHALCO AYCAYA", "t": "-" },
-          { "m": "E", "l": "10", "n": "FRANCISCA OCHOA QUISPE", "t": "-" },
-          { "m": "E", "l": "11", "n": "INES TONCONI LARICO", "t": "-" },
-          { "m": "E", "l": "12", "n": "GIAN MARCO OCHOA LLAMPAZO", "t": "-" },
-          { "m": "E", "l": "13", "n": "NICOLASA CARINA COARITA UCHASARA", "t": "-" },
-          { "m": "E", "l": "14", "n": "JUAN MANUEL MONROY CASTILLO", "t": "-" },
-          { "m": "E", "l": "15", "n": "ROSA MAMANI CONDORI", "t": "-" },
-          { "m": "E", "l": "16", "n": "GIANCARLO ANDRE LARICO ATENCIO", "t": "-" },
-          { "m": "E", "l": "17", "n": "LILIANA YANIRA AQUINO MILAVERES", "t": "-" },
-          { "m": "F", "l": "1", "n": "ADAIN PAREDES COLQUE", "t": "-" },
-          { "m": "F", "l": "2", "n": "ELENA RITA CALIZAYA SERRANO", "t": "-" },
-          { "m": "F", "l": "3", "n": "ALEJANDRO ISAAC CONDORI HUYHUA", "t": "-" },
-          { "m": "F", "l": "4", "n": "GENARO HUAYCHANI LINARES", "t": "-" },
-          { "m": "F", "l": "5", "n": "NELY RAMOS MAYTA", "t": "-" },
-          { "m": "F", "l": "6", "n": "CONSTANTINO LAYME SANTOS", "t": "-" },
-          { "m": "F", "l": "7", "n": "CELIA JOSEFINA
+$('guardar').addEventListener('click', async () => {
+  const nombre = $('nombre').value.trim();
+  const telefono = $('telefono').value.trim();
+  if (!nombre || !telefono) { msg('Escribe nombre y teléfono.'); return; }
+  if (!tokenValido()) { msg('La sesión venció. Toca "Conectar con Google".'); actualizarBotones(); return; }
+
+  $('guardar').disabled = true;
+  msg('Guardando...');
+  try {
+    const url = 'https://sheets.googleapis.com/v4/spreadsheets/' + SHEET_ID +
+      '/values/A:C:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS';
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: [[new Date().toLocaleString('es-PE'), nombre, telefono]] })
+    });
+    if (r.status === 401) { accessToken = null; msg('La sesión venció. Toca "Conectar con Google".'); }
+    else if (!r.ok) { const e = await r.json(); msg('Error ' + r.status + ': ' + (e.error && e.error.message || '')); }
+    else { msg('✔ Guardado en la hoja.'); $('nombre').value = ''; $('telefono').value = ''; }
+  } catch (e) {
+    msg('Error de conexión: ' + e.message);
+  }
+  actualizarBotones();
+});
+</script>
+<script src="https://accounts.google.com/gsi/client" async defer onload="iniciarGoogle()"></script>
+</body>
+</html>
