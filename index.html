@@ -6,230 +6,51 @@
     <title>ASOCIACIÓN VIVIENDA TALLER SANTA MARÍA</title>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-        }
-
-        body {
-            background-color: #f0f4f8;
-            padding: 16px;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-            scroll-behavior: smooth;
-        }
-
-        header {
-            text-align: center;
-            margin: 24px 0;
-            color: #1e293b;
-        }
-
-        header h1 {
-            font-size: 24px;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-
-        header p {
-            font-size: 14px;
-            color: #64748b;
-            margin-top: 4px;
-        }
-
-        .contador {
-            font-size: 15px;
-            color: #334155;
-            margin-top: 8px;
-            font-weight: 500;
-        }
-
-        .card {
-            background: white;
-            border-radius: 14px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
-        }
-
-        .btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            font-size: 17px;
-            font-weight: 600;
-            margin-bottom: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: #f0f4f8; padding: 16px; min-height: 100vh; }
+        .container { max-width: 700px; margin: 0 auto; scroll-behavior: smooth; }
+        header { text-align: center; margin: 24px 0; color: #1e293b; }
+        header h1 { font-size: 24px; margin-bottom: 8px; text-transform: uppercase; }
+        header p { font-size: 14px; color: #64748b; margin-top: 4px; }
+        .contador { font-size: 15px; color: #334155; margin-top: 8px; font-weight: 500; }
+        .card { background: white; border-radius: 14px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 17px; font-weight: 600; margin-bottom: 14px; cursor: pointer; transition: all 0.2s; }
         .btn-azul { background: #2563eb; color: white; }
         .btn-azul:hover { background: #1d4ed8; }
-
         .btn-gris { background: #64748b; color: white; }
         .btn-gris:hover { background: #475569; }
-
         .btn-verde { background: #10b981; color: white; }
         .btn-verde:hover { background: #059669; }
-
-        .busqueda {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
-            margin: 24px 0;
-        }
-
-        .campo {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .campo label {
-            font-size: 16px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #334155;
-        }
-
-        input {
-            width: 100%;
-            padding: 14px 16px;
-            font-size: 16px;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            background: #f8fafc;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-            transform: translateY(-2px);
-            transition: transform 0.2s ease;
-        }
-
-        .botones-busqueda {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .contacto {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            border-left: 8px solid;
-        }
-
-        .encabezado {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: #0f172a;
-        }
-
-        .nombre {
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #1e293b;
-        }
-
-        .dato {
-            font-size: 16px;
-            margin: 6px 0;
-            color: #475569;
-        }
-
-        .enlace-tel {
-            color: #2563eb;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-block;
-            margin: 6px 0;
-        }
-
-        .enlace-wa {
-            color: #16a34a;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-block;
-            margin: 6px 0 6px 16px;
-        }
-
-        .botones-accion {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 14px;
-        }
-
-        .btn-editar {
-            padding: 12px;
-            font-size: 16px;
-            border: none;
-            border-radius: 8px;
-            background: #e2e8f0;
-            color: #1e293b;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .btn-eliminar {
-            padding: 12px;
-            font-size: 16px;
-            border: none;
-            border-radius: 8px;
-            background: #ef4444;
-            color: white;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .vacio {
-            text-align: center;
-            padding: 50px 20px;
-            color: #94a3b8;
-            font-size: 17px;
-        }
-
-        .mensaje {
-            padding: 12px;
-            margin: 12px 0;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: 500;
-            display: none;
-        }
+        .busqueda { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 24px 0; }
+        .campo { display: flex; flex-direction: column; }
+        .campo label { font-size: 16px; font-weight: 500; margin-bottom: 8px; color: #334155; }
+        input { width: 100%; padding: 14px 16px; font-size: 16px; border: 1px solid #cbd5e1; border-radius: 10px; background: #f8fafc; }
+        input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15); }
+        .botones-busqueda { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .contacto { background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 8px solid; }
+        .encabezado { font-size: 20px; font-weight: 700; margin-bottom: 10px; color: #0f172a; }
+        .nombre { font-size: 18px; font-weight: 500; margin-bottom: 8px; color: #1e293b; }
+        .dato { font-size: 16px; margin: 6px 0; color: #475569; }
+        .enlace-tel { color: #2563eb; font-weight: 600; text-decoration: none; display: inline-block; margin: 6px 0; }
+        .enlace-wa { color: #16a34a; font-weight: 600; text-decoration: none; display: inline-block; margin: 6px 0 6px 16px; }
+        .botones-accion { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+        .btn-editar { padding: 12px; font-size: 16px; border: none; border-radius: 8px; background: #e2e8f0; color: #1e293b; font-weight: 500; cursor: pointer; }
+        .btn-eliminar { padding: 12px; font-size: 16px; border: none; border-radius: 8px; background: #ef4444; color: white; font-weight: 500; cursor: pointer; }
+        .vacio { text-align: center; padding: 50px 20px; color: #94a3b8; font-size: 17px; }
+        .mensaje { padding: 12px; margin: 12px 0; border-radius: 8px; text-align: center; font-weight: 500; display: none; }
         .exito { background: #dcfce7; color: #166534; }
-        .config-box {
-            background: #f1f5f9;
-            padding: 16px;
-            border-radius: 10px;
-            margin-bottom: 16px;
-            border: 1px solid #cbd5e1;
-        }
+        .config-box { background: #f1f5f9; padding: 16px; border-radius: 10px; margin-bottom: 16px; border: 1px solid #cbd5e1; }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>📇 ASOCIACIÓN VIVIENDA TALLER SANTA MARÍA</h1>
-            <p>Mauricio - Cloud Auto v6.5</p>
+            <p>Mauricio - Cloud Auto v7.0</p>
             <p class="contador">📋 Total de socios registrados: <strong id="contadorTotal">0</strong></p>
         </header>
 
         <div class="card">
-            <!-- Configuración del Client ID directo desde la pantalla -->
             <div class="config-box" id="seccionConfig">
                 <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">🔑 Configurar Google Client ID:</label>
                 <input type="text" id="inputClientId" placeholder="Pega tu Client ID de Google Cloud aquí..." style="margin-bottom: 10px;">
@@ -316,7 +137,7 @@
             }
             const client = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
-                scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.readonly',
+                scope: 'https://www.googleapis.com/auth/spreadsheets',
                 callback: (tokenResponse) => {
                     if (tokenResponse.access_token) {
                         accessToken = tokenResponse.access_token;
@@ -360,8 +181,15 @@
         async function guardarEnGoogleSheets() {
             if (!accessToken) return;
             try {
+                // 1. Limpiar los datos viejos en Google Sheets
+                await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/Hoja 1!A2:E999:clear`, {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+
+                // 2. Escribir la lista completa actualizada
                 const filas = socios.map(s => [s.m, s.l, s.n, s.dni, s.t]);
-                await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/Hoja 1!A2:E?valueInputOption=USER_ENTERED`, {
+                const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/Hoja 1!A2:E?valueInputOption=USER_ENTERED`, {
                     method: 'PUT',
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
@@ -369,9 +197,15 @@
                     },
                     body: JSON.stringify({ values: filas })
                 });
-                mostrarMensaje('☁️ Guardado en Google Sheets');
+
+                if (res.ok) {
+                    mostrarMensaje('☁️ Guardado en Google Sheets');
+                } else {
+                    alert("⚠️ No se pudo guardar en Google Sheets. Vuelve a Iniciar Sesión.");
+                }
             } catch (err) {
                 console.error(err);
+                alert("❌ Error de conexión al guardar en la nube");
             }
         }
 
