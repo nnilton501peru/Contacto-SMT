@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASOCIACIÓN VIVIENDA TALLER SANTA MARÍA - v5.2</title>
+    <title>ASOCIACIÓN VIVIENDA TALLER SANTA MARÍA - v5.3</title>
     <style>
         * {
             margin: 0;
@@ -78,8 +78,6 @@
         .btn-verde { background: #10b981; color: white; }
         .btn-verde:hover { background: #059669; }
 
-        .btn:disabled { background: #94a3b8; cursor: not-allowed; }
-
         .busqueda {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -112,8 +110,6 @@
             outline: none;
             border-color: #2563eb;
             box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-            transform: translateY(-2px);
-            transition: transform 0.2s ease;
         }
 
         .botones-busqueda {
@@ -219,16 +215,14 @@
     <div class="container">
         <header>
             <h1>📇 ASOCIACIÓN VIVIENDA TALLER SANTA MARÍA</h1>
-            <p>Mauricio - Premium v5.2 (Google Sheets)</p>
+            <p>Mauricio - Premium v5.3 (Google Apps Script)</p>
             <p class="contador">📋 Total de socios registrados: <strong id="contadorTotal">0</strong></p>
         </header>
 
         <div class="card">
-            <!-- Botón de Conexión Google -->
-            <button id="btnConectar" class="btn btn-gris" disabled>Cargando Google...</button>
-
-            <button class="btn btn-azul" onclick="mostrarFormularioNuevo()" id="btnNuevo" style="display:none;">➕ Agregar Nuevo</button>
-            <button class="btn btn-verde" onclick="descargarRespaldo()" id="btnRespaldo" style="display:none;">💾 Descargar Respaldo</button>
+            <button class="btn btn-azul" onclick="mostrarFormularioNuevo()">➕ Agregar Nuevo</button>
+            <button class="btn btn-gris" onclick="cargarSocios()">🔄 Actualizar Datos</button>
+            <button class="btn btn-verde" onclick="descargarRespaldo()">💾 Descargar Respaldo</button>
 
             <div class="busqueda">
                 <div class="campo">
@@ -253,101 +247,44 @@
     </div>
 
     <script>
-        const CLIENT_ID = '954568750819-am04it2kt0pb8oiiijilcgdoo8nptuu7.apps.googleusercontent.com';
-        const SHEET_ID  = '1DbCMAN9ja3AdSLbexTH8cGxuYGpwSJ33MbfAtHNyIEQ';
-        const SCOPE     = 'https://www.googleapis.com/auth/spreadsheets';
+        // PEGA AQUÍ LA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
+        const WEB_APP_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
-        let tokenClient = null;
-        let accessToken = null;
-        let vence = 0;
         let socios = [];
-        
         const mapaColores = {'A':'#FF5733','B':'#28a745','C':'#3357FF','D':'#E91E63','E':'#FFC107','F':'#8E44AD','G':'#F39C12','H':'#795548','I':'#00BCD4','J':'#D81B60','K':'#8BC34A','L':'#5E35B1','M':'#C62828','N':'#00695C'};
 
-        function tokenValido() { 
-            return accessToken && Date.now() < vence; 
-        }
+        window.onload = function() {
+            cargarSocios();
+        };
 
-        function actualizarEstadoConexion() {
-            const btn = document.getElementById('btnConectar');
-            if (tokenValido()) {
-                btn.textContent = 'Conectado a Google ✔ (Tocar para reconectar)';
-                btn.className = 'btn btn-verde';
-                document.getElementById('btnNuevo').style.display = 'block';
-                document.getElementById('btnRespaldo').style.display = 'block';
-            } else {
-                btn.textContent = 'Conectar con Google';
-                btn.className = 'btn btn-azul';
-            }
-        }
-
-        function iniciarGoogle() {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: SCOPE,
-                callback: (resp) => {
-                    if (resp.error) { 
-                        mostrarMensaje('Error de Google: ' + resp.error, 'error'); 
-                        return; 
-                    }
-                    accessToken = resp.access_token;
-                    vence = Date.now() + (resp.expires_in - 60) * 1000;
-                    actualizarEstadoConexion();
-                    mostrarMensaje('✅ Conectado correctamente. Cargando datos...', 'exito');
-                    cargarSociosDesdeGoogle();
-                },
-                error_callback: (err) => {
-                    if (err.type === 'popup_failed_to_open') mostrarMensaje('El navegador bloqueó la ventana.', 'error');
-                    else if (err.type === 'popup_closed') mostrarMensaje('Cerraste la ventana de sesión.', 'error');
-                    else mostrarMensaje('Error de autenticación.', 'error');
-                }
-            });
-            document.getElementById('btnConectar').disabled = false;
-            document.getElementById('btnConectar').textContent = 'Conectar con Google';
-            mostrarMensaje('Toca "Conectar con Google" para empezar.', 'exito');
-        }
-
-        document.getElementById('btnConectar').addEventListener('click', () => {
-            if (!tokenClient) return;
-            tokenClient.requestAccessToken({ prompt: tokenValido() ? '' : 'select_account' });
-        });
-
-        async function cargarSociosDesdeGoogle() {
-            if (!tokenValido()) {
-                mostrarMensaje('La sesión expiró. Conecta otra vez.', 'error');
-                actualizarEstadoConexion();
-                return;
-            }
-
+        async function cargarSocios() {
+            mostrarMensaje('Cargando datos desde la nube...', 'exito');
             try {
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A1:E250`;
-                const r = await fetch(url, {
-                    headers: { 'Authorization': 'Bearer ' + accessToken }
-                });
+                const response = await fetch(WEB_APP_URL);
+                const data = await response.json();
                 
-                if (!r.ok) {
-                    throw new Error('No se pudo leer la hoja de cálculo');
-                }
-
-                const data = await r.json();
-                if (data.values) {
-                    // Omitimos la fila de encabezados (fila 1) y mapeamos a las variables de la app
-                    const filas = data.values.slice(1);
+                if (data && data.length > 1) {
+                    const filas = data.slice(1);
                     socios = filas.map(row => ({
                         m: (row[0] || '').trim(),
                         l: (row[1] || '').trim(),
                         n: (row[2] || '').trim(),
                         dni: (row[3] || '').trim(),
                         t: (row[4] || '').trim() || '-'
-                    })).filter(s => s.m && s.n); // Filtrar filas vacías
+                    })).filter(s => s.m && s.n);
 
                     ordenarSocios();
                     verLista();
                     actualizarContador();
-                    mostrarMensaje(`✔ Datos sincronizados (${socios.length} registros).`, 'exito');
+                    mostrarMensaje(`✔ Sincronizado (${socios.length} registros).`, 'exito');
+                } else {
+                    socios = [];
+                    verLista();
+                    actualizarContador();
+                    mostrarMensaje('No hay registros en la hoja.', 'error');
                 }
             } catch (e) {
-                mostrarMensaje('❌ Error al cargar datos: ' + e.message, 'error');
+                mostrarMensaje('❌ Error de conexión con la nube.', 'error');
             }
         }
 
@@ -363,15 +300,6 @@
             setTimeout(() => { msg.style.display = 'none'; }, 3000);
         }
 
-        function ajustarVista() {
-            setTimeout(() => {
-                const activo = document.activeElement;
-                if (activo.tagName === 'INPUT') {
-                    activo.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }, 300);
-        }
-
         function verLista() {
             const cont = document.getElementById('resultado');
             cont.innerHTML = "";
@@ -379,7 +307,7 @@
             document.getElementById('l').value = '';
             
             if (socios.length === 0) {
-                cont.innerHTML = "<div class='vacio'>No hay registros cargados. Conecta con Google para ver la lista.</div>";
+                cont.innerHTML = "<div class='vacio'>No hay registros cargados.</div>";
                 return;
             }
             socios.forEach((s, i) => renderSocio(s, i, cont));
@@ -397,14 +325,14 @@
                 <div class='dato'>DNI: ${s.dni || "Sin DNI"}</div>
                 <div>${telLink} ${waLink}</div>
                 <div class='botones-accion'>
-                    <button class="btn-editar" onclick="mostrarEditor(${i})">✏️ Ver / Editar</button>
-                    <button class="btn-eliminar" onclick="avisoEdicionNube()">🗑️ Google Sheets</button>
+                    <button class="btn-editar" onclick="mostrarEditor(${i})">✏️ Ver Detalle</button>
+                    <button class="btn-eliminar" onclick="avisoEdicion()">🗑️ Google Sheet</button>
                 </div>
             </div>`;
         }
 
-        function avisoEdicionNube() {
-            alert("ℹ️ Para mantener la integridad de la base de datos oficial, las eliminaciones y modificaciones masivas se gestionan directamente desde tu Hoja de Cálculo.");
+        function avisoEdicion() {
+            alert("ℹ️ Las modificaciones y eliminaciones se realizan directamente en tu Hoja de Cálculo.");
         }
 
         function buscar() {
@@ -421,11 +349,8 @@
             let encontrado = false;
             
             socios.forEach((s, i) => {
-                const manzanaGuardada = s.m.toLowerCase();
-                const loteGuardado = s.l.toLowerCase();
-
-                const coincideManzana = !textoManzana || manzanaGuardada.startsWith(textoManzana);
-                const coincideLote = !textoLote || loteGuardado.startsWith(textoLote);
+                const coincideManzana = !textoManzana || s.m.toLowerCase().startsWith(textoManzana);
+                const coincideLote = !textoLote || s.l.toLowerCase().startsWith(textoLote);
 
                 if (coincideManzana && coincideLote) {
                     renderSocio(s, i, cont);
@@ -439,26 +364,22 @@
         }
 
         function mostrarFormularioNuevo() {
-            if (!tokenValido()) {
-                alert("⚠️ Debes conectar con Google primero.");
-                return;
-            }
             document.getElementById('resultado').innerHTML = `
             <div class="card">
-                <h3 style="margin-bottom: 16px; color: #1e293b;">Agregar Nuevo Socio a la Hoja</h3>
-                <input type="text" id="nuevo_m" placeholder="Manzana (Ej: A)" onfocus="ajustarVista()">
-                <input type="text" id="nuevo_l" placeholder="Lote (Ej: 4)" required onfocus="ajustarVista()">
-                <input type="text" id="nuevo_n" placeholder="Nombre completo" required onfocus="ajustarVista()">
-                <input type="text" id="nuevo_dni" placeholder="DNI" onfocus="ajustarVista()">
-                <input type="text" id="nuevo_t" placeholder="Teléfono" onfocus="ajustarVista()">
+                <h3 style="margin-bottom: 16px; color: #1e293b;">Agregar Nuevo Socio</h3>
+                <div class="campo"><label>Manzana</label><input type="text" id="nuevo_m" placeholder="Ej: A"></div>
+                <div class="campo"><label>Lote</label><input type="text" id="nuevo_l" placeholder="Ej: 4"></div>
+                <div class="campo"><label>Nombre</label><input type="text" id="nuevo_n" placeholder="Nombre completo"></div>
+                <div class="campo"><label>DNI</label><input type="text" id="nuevo_dni" placeholder="DNI"></div>
+                <div class="campo"><label>Teléfono</label><input type="text" id="nuevo_t" placeholder="Teléfono"></div>
                 <div class="botones-accion" style="margin-top: 16px;">
-                    <button class="btn btn-verde" onclick="guardarNuevoEnGoogle()">Guardar en la Hoja</button>
+                    <button class="btn btn-verde" onclick="guardarNuevo()">Guardar en la Hoja</button>
                     <button class="btn btn-gris" onclick="verLista()">Cancelar</button>
                 </div>
             </div>`;
         }
 
-        async function guardarNuevoEnGoogle() {
+        async function guardarNuevo() {
             const m = document.getElementById('nuevo_m').value.toUpperCase().trim();
             const l = document.getElementById('nuevo_l').value.trim();
             const n = document.getElementById('nuevo_n').value.trim();
@@ -470,31 +391,20 @@
                 return;
             }
 
-            if (!tokenValido()) {
-                mostrarMensaje('La sesión venció. Conecta otra vez.', 'error');
-                actualizarEstadoConexion();
-                return;
-            }
-
-            mostrarMensaje('Guardando en Google Sheets...', 'exito');
+            mostrarMensaje('Guardando en la nube...', 'exito');
 
             try {
-                // Orden de columnas en tu hoja: A=Manzana, B=Lote, C=Nombre, D=DNI, E=Teléfono[span_2](start_span)[span_2](end_span)
-                const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A:E:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
-                const r = await fetch(url, {
+                await fetch(WEB_APP_URL, {
                     method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ values: [[m, l, n, dni, t]] })
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ m, l, n, dni, t })
                 });
 
-                if (!r.ok) {
-                    throw new Error('Error al registrar en la nube');
-                }
-
-                mostrarMensaje('✔ Guardado con éxito en la hoja.', 'exito');
-                cargarSociosDesdeGoogle(); // Recarga automática de la lista actualizada
+                mostrarMensaje('✔ Guardado con éxito.', 'exito');
+                setTimeout(() => { cargarSocios(); }, 1500);
             } catch (e) {
-                mostrarMensaje('Error de red: ' + e.message, 'error');
+                mostrarMensaje('Error al guardar.', 'error');
             }
         }
 
@@ -508,7 +418,7 @@
                 <div class="campo"><label>Nombre</label><input type="text" value="${s.n}" disabled></div>
                 <div class="campo"><label>DNI</label><input type="text" value="${s.dni || ''}" disabled></div>
                 <div class="campo"><label>Teléfono</label><input type="text" value="${s.t}" disabled></div>
-                <p style="font-size:13px; color:#64748b; margin-top:12px; text-align:center;">💡 Los cambios y actualizaciones directas se realizan en tu Google Sheet.</p>
+                <p style="font-size:13px; color:#64748b; margin-top:12px; text-align:center;">💡 Ediciones directas se realizan en tu Google Sheet.</p>
                 <div class="botones-accion" style="margin-top: 16px;">
                     <button class="btn btn-gris" onclick="verLista()">Volver a la Lista</button>
                 </div>
@@ -526,10 +436,20 @@
             a.href = url;
             a.download = "ASOCIACION_SANTA_MARIA_RESPALDO.json";
             a.click();
-            mostrarMensaje('💾 Respaldo descargado correctamente', 'exito');
+            mostrarMensaje('💾 Respaldo descargado', 'exito');
         }
 
         function ordenarSocios() {
             if (!socios || socios.length === 0) return;
             socios.sort((a, b) => {
-                let manA = (
+                let manA = (a.m || "").toUpperCase();
+                let manB = (b.m || "").toUpperCase();
+                if (manA !== manB) return manA.localeCompare(manB);
+                let lotA = (a.l || "").toString();
+                let lotB = (b.l || "").toString();
+                return lotA.localeCompare(lotB, undefined, { numeric: true, sensitivity: 'base' });
+            });
+        }
+    </script>
+</body>
+</html>
