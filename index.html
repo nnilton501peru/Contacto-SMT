@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASOCIACIÓN VIVIENDA TALLER SANTA MARÍA - v5.3</title>
+    <title>ASOCIACIÓN VIVIENDA TALLER SANTA MARÍA - Mauricio Premium v6.2</title>
     <style>
         * {
             margin: 0;
@@ -110,6 +110,8 @@
             outline: none;
             border-color: #2563eb;
             box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+            transform: translateY(-2px);
+            transition: transform 0.2s ease;
         }
 
         .botones-busqueda {
@@ -208,21 +210,53 @@
             display: none;
         }
         .exito { background: #dcfce7; color: #166534; }
-        .error { background: #fee2e2; color: #991b1b; }
+
+        .login-gate { max-width: 520px; margin: 6vh auto 24px; }
+        .login-panel { background:#fff; border-radius:18px; padding:26px 22px; box-shadow:0 10px 32px rgba(15,23,42,.10); }
+        .login-panel h1 { font-size:24px; color:#1e293b; margin-bottom:12px; text-align:center; }
+        .login-intro { color:#475569; line-height:1.5; margin-bottom:20px; text-align:center; }
+        .login-panel label { display:block; color:#334155; font-weight:700; margin:12px 0 8px; }
+        .login-panel input { width:100%; padding:13px; border:1px solid #cbd5e1; border-radius:10px; font-size:16px; }
+        .login-help { color:#64748b; font-size:13px; line-height:1.45; margin:8px 0 14px; }
+        .login-status { color:#475569; font-size:14px; line-height:1.45; margin-top:12px; }
+        @media (max-width:480px) { body { padding:12px; } .login-panel { padding:22px 16px; } }
+
     </style>
 </head>
 <body>
-    <div class="container">
+
+    <section id="loginGate" class="login-gate" aria-labelledby="loginTitle">
+      <div class="login-panel">
+        <div style="font-size:42px;margin-bottom:8px">🔐</div>
+        <h1 id="loginTitle">Mauricio - Premium v6.2</h1>
+        <p class="login-intro">Para abrir tus contactos, primero configura tu Client ID e inicia sesión con Google.</p>
+        <label for="clientIdInput">Código de cliente de Google (Client ID)</label>
+        <input id="clientIdInput" type="text" inputmode="url" autocomplete="off"
+          placeholder="Pega aquí tu Client ID de Google" aria-describedby="clientHelp">
+        <p id="clientHelp" class="login-help">Es el identificador OAuth que termina en <strong>apps.googleusercontent.com</strong>. No escribas una contraseña ni un secreto.</p>
+        <button type="button" class="btn btn-azul" id="saveClientIdBtn" onclick="guardarClientId()">Guardar código de cliente</button>
+        <button type="button" class="btn btn-verde" id="loginGoogleBtn" onclick="conectarGoogle()">Iniciar sesión con Google</button>
+        <p id="gateStatus" class="login-status" role="status">Tus contactos permanecerán ocultos hasta autorizar el acceso.</p>
+      </div>
+    </section>
+
+    <div class="container" id="appContainer" style="display:none">
         <header>
             <h1>📇 ASOCIACIÓN VIVIENDA TALLER SANTA MARÍA</h1>
-            <p>Mauricio - Premium v5.3 (Google Apps Script)</p>
+            <p>Mauricio - Premium v6.2</p>
             <p class="contador">📋 Total de socios registrados: <strong id="contadorTotal">0</strong></p>
         </header>
 
         <div class="card">
             <button class="btn btn-azul" onclick="mostrarFormularioNuevo()">➕ Agregar Nuevo</button>
-            <button class="btn btn-gris" onclick="cargarSocios()">🔄 Actualizar Datos</button>
+            
+            <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="cargarArchivo(event)">
+            <button class="btn btn-gris" onclick="document.getElementById('fileInput').click()">📂 Cargar Archivo</button>
+            
             <button class="btn btn-verde" onclick="descargarRespaldo()">💾 Descargar Respaldo</button>
+            <button class="btn btn-azul" id="btnGoogle" onclick="conectarGoogle()">☁️ Conectar Google Sheets</button>
+            <button class="btn btn-verde" onclick="guardarPrimeraVezEnGoogle()">⬆️ Guardar contactos en Google Sheets</button>
+            <p style="font-size:13px;color:#64748b;margin:-4px 0 14px;line-height:1.4">La conexión requiere configurar el ID de cliente de Google. Tus archivos originales no se modifican.</p>
 
             <div class="busqueda">
                 <div class="campo">
@@ -240,64 +274,261 @@
                 <button class="btn btn-verde" onclick="verLista()">Ver Todos</button>
             </div>
 
-            <div id="mensaje" class="mensaje"></div>
+            <div id="mensaje" class="mensaje exito"></div>
         </div>
 
         <div id="resultado"></div>
     </div>
 
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
-        // PEGA AQUÍ LA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
-        const WEB_APP_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
-
+        // Mauricio - Premium v6.2
+        // Configuración: coloca aquí el ID DE CLIENTE OAuth (no el secreto).
+        let GOOGLE_CLIENT_ID = localStorage.getItem('mauricioGoogleClientId') || '';
+        const SPREADSHEET_ID = '1DbCMAN9ja3AdSLbexTH8cGxuYGpwSJ33MbfAtHNyIEQ';
+        const SHEETS_SCOPE = 'https://www.googleapis.com/auth/spreadsheets';
+        let googleTokenClient = null;
+        let googleAccessToken = '';
+        let googleTokenVence = 0;
+        let googleConectado = false;
         let socios = [];
         const mapaColores = {'A':'#FF5733','B':'#28a745','C':'#3357FF','D':'#E91E63','E':'#FFC107','F':'#8E44AD','G':'#F39C12','H':'#795548','I':'#00BCD4','J':'#D81B60','K':'#8BC34A','L':'#5E35B1','M':'#C62828','N':'#00695C'};
 
-        window.onload = function() {
-            cargarSocios();
-        };
 
-        async function cargarSocios() {
-            mostrarMensaje('Cargando datos desde la nube...', 'exito');
-            try {
-                const response = await fetch(WEB_APP_URL);
-                const data = await response.json();
-                
-                if (data && data.length > 1) {
-                    const filas = data.slice(1);
-                    socios = filas.map(row => ({
-                        m: (row[0] || '').trim(),
-                        l: (row[1] || '').trim(),
-                        n: (row[2] || '').trim(),
-                        dni: (row[3] || '').trim(),
-                        t: (row[4] || '').trim() || '-'
-                    })).filter(s => s.m && s.n);
+        function actualizarEstadoInicio(texto) {
+            const estado = document.getElementById('gateStatus');
+            if (estado) estado.textContent = texto;
+        }
 
-                    ordenarSocios();
-                    verLista();
-                    actualizarContador();
-                    mostrarMensaje(`✔ Sincronizado (${socios.length} registros).`, 'exito');
-                } else {
-                    socios = [];
-                    verLista();
-                    actualizarContador();
-                    mostrarMensaje('No hay registros en la hoja.', 'error');
-                }
-            } catch (e) {
-                mostrarMensaje('❌ Error de conexión con la nube.', 'error');
+        function guardarClientId() {
+            const campo = document.getElementById('clientIdInput');
+            const valor = (campo.value || '').trim();
+            if (!valor || !valor.endsWith('.apps.googleusercontent.com')) {
+                actualizarEstadoInicio('Revisa el Client ID. Debe terminar en .apps.googleusercontent.com.');
+                campo.focus();
+                return;
             }
+            GOOGLE_CLIENT_ID = valor;
+            localStorage.setItem('mauricioGoogleClientId', valor);
+            actualizarEstadoInicio('Código guardado en este navegador. Ahora toca “Iniciar sesión con Google”.');
+        }
+
+        function abrirAplicacionAutorizada() {
+            document.getElementById('loginGate').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            iniciar();
+        }
+
+        function mostrarPantallaInicio(mensaje) {
+            document.getElementById('appContainer').style.display = 'none';
+            document.getElementById('loginGate').style.display = 'block';
+            if (mensaje) actualizarEstadoInicio(mensaje);
         }
 
         function actualizarContador() {
             document.getElementById('contadorTotal').textContent = socios.length;
         }
 
-        function mostrarMensaje(texto, tipo = 'exito') {
+        function mostrarMensaje(texto) {
             const msg = document.getElementById('mensaje');
             msg.textContent = texto;
-            msg.className = 'mensaje ' + tipo;
             msg.style.display = 'block';
-            setTimeout(() => { msg.style.display = 'none'; }, 3000);
+            setTimeout(() => { msg.style.display = 'none'; }, 2000);
+        }
+
+        function ajustarVista() {
+            setTimeout(() => {
+                const activo = document.activeElement;
+                if (activo.tagName === 'INPUT') {
+                    activo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 300);
+        }
+
+        function configurarGoogle() {
+            if (!window.google || !google.accounts || !google.accounts.oauth2) return false;
+            if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_ID.endsWith('.apps.googleusercontent.com')) {
+                mostrarPantallaInicio('Primero escribe y guarda un Client ID válido.');
+                return false;
+            }
+            googleTokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: GOOGLE_CLIENT_ID,
+                scope: SHEETS_SCOPE,
+                callback: async (respuesta) => {
+                    if (respuesta.error) {
+                        mostrarPantallaInicio('Google no autorizó el acceso. Comprueba la cuenta y vuelve a intentarlo.');
+                        return;
+                    }
+                    googleAccessToken = respuesta.access_token;
+                    googleTokenVence = Date.now() + Math.max(0, (Number(respuesta.expires_in || 3600) - 60)) * 1000;
+                    googleConectado = true;
+                    abrirAplicacionAutorizada();
+                    document.getElementById('btnGoogle').textContent = '☁️ Google Sheets conectado';
+                    try {
+                        const cargados = await cargarDesdeGoogleSheets();
+                        if (cargados) {
+                            mostrarMensaje('✅ Contactos cargados desde Google Sheets');
+                        } else {
+                            mostrarMensaje('Google conectado. La pestaña está vacía; tus contactos locales se conservaron.');
+                        }
+                    } catch (e) {
+                        googleConectado = false;
+                        document.getElementById('btnGoogle').textContent = '☁️ Conectar Google Sheets';
+                        alert('No se pudo leer la hoja. Verifica que la API de Google Sheets esté activada y que tu cuenta tenga acceso. Detalle: ' + e.message);
+                    }
+                }
+            });
+            return true;
+        }
+
+        function conectarGoogle() {
+            const campo = document.getElementById('clientIdInput');
+            const escrito = (campo?.value || '').trim();
+            if (escrito && escrito !== GOOGLE_CLIENT_ID) {
+                actualizarEstadoInicio('Primero toca “Guardar código de cliente” para guardar el cambio.');
+                return;
+            }
+            if (!GOOGLE_CLIENT_ID) {
+                mostrarPantallaInicio('Escribe tu Client ID y toca “Guardar código de cliente”.');
+                document.getElementById('clientIdInput')?.focus();
+                return;
+            }
+            if (!window.google || !google.accounts || !google.accounts.oauth2) {
+                actualizarEstadoInicio('Google todavía está cargando. Espera unos segundos y vuelve a tocar el botón.');
+                return;
+            }
+            if (!configurarGoogle()) return;
+            googleTokenClient.requestAccessToken({ prompt: 'consent' });
+        }
+
+        function tokenGoogleValido() {
+            return Boolean(googleConectado && googleAccessToken && Date.now() < googleTokenVence);
+        }
+
+        async function sheetsRequest(path, options = {}) {
+            if (!tokenGoogleValido()) {
+                googleConectado = false;
+                mostrarPantallaInicio('La autorización venció. Inicia sesión con Google otra vez.');
+                throw new Error('La autorización de Google venció. Vuelve a iniciar sesión con Google.');
+            }
+            const response = await fetch('https://sheets.googleapis.com/v4/spreadsheets/' + SPREADSHEET_ID + path, {
+                ...options,
+                headers: { 'Authorization': 'Bearer ' + googleAccessToken, 'Content-Type': 'application/json', ...(options.headers || {}) }
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.error?.message || ('Error HTTP ' + response.status));
+            return data;
+        }
+
+        async function obtenerNombrePestana() {
+            const nombreObjetivo = 'Contactos Mauricio';
+            const meta = await sheetsRequest('?fields=sheets.properties.title,sheets.properties.sheetId');
+            const existe = (meta.sheets || []).some(s => s.properties?.title === nombreObjetivo);
+            if (existe) return nombreObjetivo;
+            // Crear una pestaña dedicada para no sobrescribir las otras pestañas de la hoja del usuario.
+            await sheetsRequest(':batchUpdate', {
+                method: 'POST',
+                body: JSON.stringify({ requests: [{ addSheet: { properties: { title: nombreObjetivo } } }] })
+            });
+            return nombreObjetivo;
+        }
+
+        function rangoSeguro(titulo) {
+            return "'" + titulo.replace(/'/g, "''") + "'!A:E";
+        }
+
+        async function cargarDesdeGoogleSheets() {
+            const titulo = await obtenerNombrePestana();
+            const data = await sheetsRequest('/values/' + encodeURIComponent(rangoSeguro(titulo)));
+            const rows = data.values || [];
+            if (!rows.length) {
+                // No tocar socios ni localStorage si la pestaña de la nube está vacía.
+                return false;
+            }
+            const first = rows[0].map(v => String(v || '').trim().toLowerCase());
+            const hasHeader = first.some(v => ['manzana', 'lote', 'nombre', 'dni', 'teléfono', 'telefono'].includes(v));
+            const records = hasHeader ? rows.slice(1) : rows;
+            socios = records.filter(r => r.length && r.some(v => String(v || '').trim() !== '')).map(r => ({
+                m: String(r[0] || '').trim().toUpperCase(),
+                l: String(r[1] || '').trim(),
+                n: String(r[2] || '').trim(),
+                dni: String(r[3] || '').trim(),
+                t: String(r[4] || '-').trim() || '-'
+            })).filter(s => s.m && s.l && s.n);
+            ordenarSocios();
+            localStorage.setItem('misSocios', JSON.stringify(socios));
+            verLista();
+            actualizarContador();
+            return true;
+        }
+
+        async function guardarPrimeraVezEnGoogle() {
+            if (!tokenGoogleValido()) {
+                alert('La conexión con Google no está activa o venció. Toca “Conectar Google Sheets” y autoriza tu cuenta.');
+                return;
+            }
+            if (!socios.length) {
+                alert('Primero carga tu archivo JSON o abre los contactos guardados en este dispositivo.');
+                return;
+            }
+            if (!confirm('Se escribirán los contactos actuales en la pestaña dedicada “Contactos Mauricio”. Las otras pestañas no se modificarán. ¿Deseas continuar?')) return;
+            try { await guardarEnGoogleSheets(); mostrarMensaje('✅ Contactos guardados en Google Sheets'); }
+            catch (e) { alert('No se pudieron guardar los contactos. Detalle: ' + e.message); }
+        }
+
+        async function guardarEnGoogleSheets() {
+            if (!tokenGoogleValido()) {
+                throw new Error('La conexión con Google no está activa o venció. Vuelve a conectar antes de guardar.');
+            }
+            const titulo = await obtenerNombrePestana();
+            const range = rangoSeguro(titulo);
+            const rows = [['Manzana', 'Lote', 'Nombre', 'DNI', 'Teléfono'], ...socios.map(s => [s.m, s.l, s.n, s.dni || '', s.t || '-'])];
+            // Se sobrescribe únicamente A:E de la pestaña dedicada “Contactos Mauricio”; las demás pestañas no se modifican.
+            await sheetsRequest('/values/' + encodeURIComponent(range) + ':clear', { method: 'POST', body: '{}' });
+            await sheetsRequest('/values/' + encodeURIComponent("'" + titulo.replace(/'/g, "''") + "'!A1:E" + rows.length) + '?valueInputOption=RAW', {
+                method: 'PUT', body: JSON.stringify({ majorDimension: 'ROWS', values: rows })
+            });
+        }
+
+        async function guardarLocalYNube(mensaje) {
+            localStorage.setItem('misSocios', JSON.stringify(socios));
+            if (googleConectado) {
+                try { await guardarEnGoogleSheets(); mostrarMensaje(mensaje + ' y sincronizado con Google Sheets'); }
+                catch (e) { mostrarMensaje(mensaje + ', pero falló la sincronización'); alert('Los cambios quedaron guardados en este dispositivo, pero no en Google Sheets. Detalle: ' + e.message); }
+            } else { mostrarMensaje(mensaje); }
+        }
+
+        function iniciar() {
+            const guardado = localStorage.getItem('misSocios');
+            if (guardado) {
+                socios = JSON.parse(guardado);
+                ordenarSocios();
+                verLista();
+                actualizarContador();
+            } else {
+                document.getElementById('resultado').innerHTML = "<div class='vacio'>No hay datos. Carga tu archivo para empezar.</div>";
+                actualizarContador();
+            }
+        }
+
+        function cargarArchivo(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    socios = JSON.parse(e.target.result);
+                    ordenarSocios();
+                    localStorage.setItem('misSocios', JSON.stringify(socios));
+                    verLista();
+                    actualizarContador();
+                    mostrarMensaje('Archivo cargado correctamente');
+                } catch (error) {
+                    alert("❌ Error: El archivo no es válido");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
         }
 
         function verLista() {
@@ -307,14 +538,14 @@
             document.getElementById('l').value = '';
             
             if (socios.length === 0) {
-                cont.innerHTML = "<div class='vacio'>No hay registros cargados.</div>";
+                cont.innerHTML = "<div class='vacio'>No hay registros guardados.</div>";
                 return;
             }
             socios.forEach((s, i) => renderSocio(s, i, cont));
         }
 
         function renderSocio(s, i, cont) {
-            const color = mapaColores[(s.m || '').toUpperCase()] || '#cbd5e1';
+            const color = mapaColores[s.m.toUpperCase()] || '#cbd5e1';
             const telLink = (s.t && s.t !== '-') ? `<a href="tel:${s.t}" class="enlace-tel">📞 ${s.t}</a>` : "<span class='dato'>Teléfono: -</span>";
             const waLink = (s.t && s.t !== '-') ? `<a href="https://wa.me/${s.t}" target="_blank" class="enlace-wa">💬 WhatsApp</a>` : "";
             
@@ -325,16 +556,13 @@
                 <div class='dato'>DNI: ${s.dni || "Sin DNI"}</div>
                 <div>${telLink} ${waLink}</div>
                 <div class='botones-accion'>
-                    <button class="btn-editar" onclick="mostrarEditor(${i})">✏️ Ver Detalle</button>
-                    <button class="btn-eliminar" onclick="avisoEdicion()">🗑️ Google Sheet</button>
+                    <button class="btn-editar" onclick="mostrarEditor(${i})">✏️ Editar</button>
+                    <button class="btn-eliminar" onclick="eliminarSocio(${i})">🗑️ Eliminar</button>
                 </div>
             </div>`;
         }
 
-        function avisoEdicion() {
-            alert("ℹ️ Las modificaciones y eliminaciones se realizan directamente en tu Hoja de Cálculo.");
-        }
-
+        // 👇 BÚSQUEDA CORREGIDA: empieza por lo que escribes, sin importar mayúsculas
         function buscar() {
             const textoManzana = document.getElementById('m').value.trim().toLowerCase();
             const textoLote = document.getElementById('l').value.trim().toLowerCase();
@@ -349,8 +577,12 @@
             let encontrado = false;
             
             socios.forEach((s, i) => {
-                const coincideManzana = !textoManzana || s.m.toLowerCase().startsWith(textoManzana);
-                const coincideLote = !textoLote || s.l.toLowerCase().startsWith(textoLote);
+                const manzanaGuardada = s.m.toLowerCase();
+                const loteGuardado = s.l.toLowerCase();
+
+                // Ahora busca SOLO si EMPIEZA por el texto que escribiste
+                const coincideManzana = !textoManzana || manzanaGuardada.startsWith(textoManzana);
+                const coincideLote = !textoLote || loteGuardado.startsWith(textoLote);
 
                 if (coincideManzana && coincideLote) {
                     renderSocio(s, i, cont);
@@ -366,63 +598,74 @@
         function mostrarFormularioNuevo() {
             document.getElementById('resultado').innerHTML = `
             <div class="card">
-                <h3 style="margin-bottom: 16px; color: #1e293b;">Agregar Nuevo Socio</h3>
-                <div class="campo"><label>Manzana</label><input type="text" id="nuevo_m" placeholder="Ej: A"></div>
-                <div class="campo"><label>Lote</label><input type="text" id="nuevo_l" placeholder="Ej: 4"></div>
-                <div class="campo"><label>Nombre</label><input type="text" id="nuevo_n" placeholder="Nombre completo"></div>
-                <div class="campo"><label>DNI</label><input type="text" id="nuevo_dni" placeholder="DNI"></div>
-                <div class="campo"><label>Teléfono</label><input type="text" id="nuevo_t" placeholder="Teléfono"></div>
+                <h3 style="margin-bottom: 16px; color: #1e293b;">Agregar Nuevo Contacto</h3>
+                <input type="text" id="nuevo_m" placeholder="Manzana" onfocus="ajustarVista()">
+                <input type="text" id="nuevo_l" placeholder="Lote" required onfocus="ajustarVista()">
+                <input type="text" id="nuevo_n" placeholder="Nombre completo" required onfocus="ajustarVista()">
+                <input type="text" id="nuevo_dni" placeholder="DNI" onfocus="ajustarVista()">
+                <input type="text" id="nuevo_t" placeholder="Teléfono" onfocus="ajustarVista()">
                 <div class="botones-accion" style="margin-top: 16px;">
-                    <button class="btn btn-verde" onclick="guardarNuevo()">Guardar en la Hoja</button>
+                    <button class="btn btn-verde" onclick="guardarNuevo()">Guardar</button>
                     <button class="btn btn-gris" onclick="verLista()">Cancelar</button>
                 </div>
             </div>`;
         }
 
-        async function guardarNuevo() {
-            const m = document.getElementById('nuevo_m').value.toUpperCase().trim();
-            const l = document.getElementById('nuevo_l').value.trim();
-            const n = document.getElementById('nuevo_n').value.trim();
-            const dni = document.getElementById('nuevo_dni').value.trim();
-            const t = document.getElementById('nuevo_t').value.trim() || '';
-
-            if (!m || !l || !n) {
+        function guardarNuevo() {
+            const nuevoSocio = {
+                m: document.getElementById('nuevo_m').value.toUpperCase().trim(),
+                l: document.getElementById('nuevo_l').value.trim(),
+                n: document.getElementById('nuevo_n').value.trim(),
+                dni: document.getElementById('nuevo_dni').value.trim(),
+                t: document.getElementById('nuevo_t').value.trim() || '-'
+            };
+            if (!nuevoSocio.m || !nuevoSocio.l || !nuevoSocio.n) {
                 alert("❌ Faltan datos obligatorios: Manzana, Lote y Nombre");
                 return;
             }
-
-            mostrarMensaje('Guardando en la nube...', 'exito');
-
-            try {
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({ m, l, n, dni, t })
-                });
-
-                mostrarMensaje('✔ Guardado con éxito.', 'exito');
-                setTimeout(() => { cargarSocios(); }, 1500);
-            } catch (e) {
-                mostrarMensaje('Error al guardar.', 'error');
-            }
+            socios.push(nuevoSocio);
+            ordenarSocios();
+            guardarLocalYNube('✅ Contacto agregado correctamente');
+            verLista();
+            actualizarContador();
         }
 
         function mostrarEditor(i) {
             const s = socios[i];
             document.getElementById('resultado').innerHTML = `
             <div class="card">
-                <h3 style="margin-bottom: 16px; color: #1e293b;">Detalle del Socio</h3>
-                <div class="campo"><label>Manzana</label><input type="text" value="${s.m}" disabled></div>
-                <div class="campo"><label>Lote</label><input type="text" value="${s.l}" disabled></div>
-                <div class="campo"><label>Nombre</label><input type="text" value="${s.n}" disabled></div>
-                <div class="campo"><label>DNI</label><input type="text" value="${s.dni || ''}" disabled></div>
-                <div class="campo"><label>Teléfono</label><input type="text" value="${s.t}" disabled></div>
-                <p style="font-size:13px; color:#64748b; margin-top:12px; text-align:center;">💡 Ediciones directas se realizan en tu Google Sheet.</p>
+                <h3 style="margin-bottom: 16px; color: #1e293b;">Editar Contacto</h3>
+                <input type="text" id="edit_m" value="${s.m}" onfocus="ajustarVista()">
+                <input type="text" id="edit_l" value="${s.l}" onfocus="ajustarVista()">
+                <input type="text" id="edit_n" value="${s.n}" onfocus="ajustarVista()">
+                <input type="text" id="edit_dni" value="${s.dni || ''}" onfocus="ajustarVista()">
+                <input type="text" id="edit_t" value="${s.t}" onfocus="ajustarVista()">
                 <div class="botones-accion" style="margin-top: 16px;">
-                    <button class="btn btn-gris" onclick="verLista()">Volver a la Lista</button>
+                    <button class="btn btn-verde" onclick="guardar(${i})">Guardar Cambios</button>
+                    <button class="btn btn-gris" onclick="verLista()">Cancelar</button>
                 </div>
             </div>`;
+        }
+
+        function guardar(i) {
+            socios[i].m = document.getElementById('edit_m').value.toUpperCase().trim();
+            socios[i].l = document.getElementById('edit_l').value.trim();
+            socios[i].n = document.getElementById('edit_n').value.trim();
+            socios[i].dni = document.getElementById('edit_dni').value.trim();
+            socios[i].t = document.getElementById('edit_t').value.trim() || '-';
+            ordenarSocios();
+            guardarLocalYNube('✅ Cambios guardados correctamente');
+            verLista();
+        }
+
+        function eliminarSocio(i) {
+            if (confirm("⚠️ ¿Estás seguro de eliminar este registro? Esta acción no se puede deshacer")) {
+                socios.splice(i, 1);
+                ordenarSocios();
+                guardarLocalYNube('🗑️ Registro eliminado correctamente');
+                verLista();
+                actualizarContador();
+            }
         }
 
         function descargarRespaldo() {
@@ -434,9 +677,9 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = "ASOCIACION_SANTA_MARIA_RESPALDO.json";
+            a.download = "ASOCIACION_SANTA_MARIA_respaldo_v6.2.json";
             a.click();
-            mostrarMensaje('💾 Respaldo descargado', 'exito');
+            mostrarMensaje('💾 Respaldo descargado correctamente');
         }
 
         function ordenarSocios() {
@@ -450,6 +693,14 @@
                 return lotA.localeCompare(lotB, undefined, { numeric: true, sensitivity: 'base' });
             });
         }
+
+        // Al abrir la página, mostrar solo la pantalla de acceso.
+        // Los datos locales no se cargan ni se muestran hasta autorizar Google.
+        window.addEventListener('DOMContentLoaded', () => {
+            const guardado = localStorage.getItem('mauricioGoogleClientId') || '';
+            document.getElementById('clientIdInput').value = guardado;
+            mostrarPantallaInicio();
+        });
     </script>
 </body>
 </html>
