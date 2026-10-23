@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASOCIACIÓN VIVIENDA TALLER SANTA MARÍA - Mauricio Premium v6.2</title>
+    <title>ASOCIACIÓN VIVIENDA TALLER SANTA MARÍA - Mauricio Premium v6.3</title>
     <style>
         * {
             margin: 0;
@@ -228,7 +228,7 @@
     <section id="loginGate" class="login-gate" aria-labelledby="loginTitle">
       <div class="login-panel">
         <div style="font-size:42px;margin-bottom:8px">🔐</div>
-        <h1 id="loginTitle">Mauricio - Premium v6.2</h1>
+        <h1 id="loginTitle">Mauricio - Premium v6.3</h1>
         <p class="login-intro">Para abrir tus contactos, primero configura tu Client ID e inicia sesión con Google.</p>
         <label for="clientIdInput">Código de cliente de Google (Client ID)</label>
         <input id="clientIdInput" type="text" inputmode="url" autocomplete="off"
@@ -243,7 +243,7 @@
     <div class="container" id="appContainer" style="display:none">
         <header>
             <h1>📇 ASOCIACIÓN VIVIENDA TALLER SANTA MARÍA</h1>
-            <p>Mauricio - Premium v6.2</p>
+            <p>Mauricio - Premium v6.3</p>
             <p class="contador">📋 Total de socios registrados: <strong id="contadorTotal">0</strong></p>
         </header>
 
@@ -282,7 +282,7 @@
 
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
-        // Mauricio - Premium v6.2
+        // Mauricio - Premium v6.3
         // Configuración: coloca aquí el ID DE CLIENTE OAuth (no el secreto).
         let GOOGLE_CLIENT_ID = localStorage.getItem('mauricioGoogleClientId') || '';
         const SPREADSHEET_ID = '1DbCMAN9ja3AdSLbexTH8cGxuYGpwSJ33MbfAtHNyIEQ';
@@ -421,15 +421,14 @@
         }
 
         async function obtenerNombrePestana() {
-            const nombreObjetivo = 'Contactos Mauricio';
+            // Mauricio Premium v6.3: usar la pestaña existente del usuario.
+            // No crear pestañas nuevas ni modificar otras pestañas automáticamente.
+            const nombreObjetivo = 'Hoja 1';
             const meta = await sheetsRequest('?fields=sheets.properties.title,sheets.properties.sheetId');
             const existe = (meta.sheets || []).some(s => s.properties?.title === nombreObjetivo);
-            if (existe) return nombreObjetivo;
-            // Crear una pestaña dedicada para no sobrescribir las otras pestañas de la hoja del usuario.
-            await sheetsRequest(':batchUpdate', {
-                method: 'POST',
-                body: JSON.stringify({ requests: [{ addSheet: { properties: { title: nombreObjetivo } } }] })
-            });
+            if (!existe) {
+                throw new Error('No se encontró la pestaña “Hoja 1”. No se modificó ninguna pestaña. Revisa el nombre exacto de la pestaña en Google Sheets.');
+            }
             return nombreObjetivo;
         }
 
@@ -471,7 +470,7 @@
                 alert('Primero carga tu archivo JSON o abre los contactos guardados en este dispositivo.');
                 return;
             }
-            if (!confirm('Se escribirán los contactos actuales en la pestaña dedicada “Contactos Mauricio”. Las otras pestañas no se modificarán. ¿Deseas continuar?')) return;
+            if (!confirm('Se reemplazará el contenido de las columnas A:E de “Hoja 1” por los contactos que muestra la aplicación. Las demás columnas y pestañas no se modificarán. ¿Tienes un respaldo y deseas continuar?')) return;
             try { await guardarEnGoogleSheets(); mostrarMensaje('✅ Contactos guardados en Google Sheets'); }
             catch (e) { alert('No se pudieron guardar los contactos. Detalle: ' + e.message); }
         }
@@ -483,7 +482,7 @@
             const titulo = await obtenerNombrePestana();
             const range = rangoSeguro(titulo);
             const rows = [['Manzana', 'Lote', 'Nombre', 'DNI', 'Teléfono'], ...socios.map(s => [s.m, s.l, s.n, s.dni || '', s.t || '-'])];
-            // Se sobrescribe únicamente A:E de la pestaña dedicada “Contactos Mauricio”; las demás pestañas no se modifican.
+            // Se sobrescribe únicamente A:E de la pestaña “Hoja 1”; las demás pestañas no se modifican.
             await sheetsRequest('/values/' + encodeURIComponent(range) + ':clear', { method: 'POST', body: '{}' });
             await sheetsRequest('/values/' + encodeURIComponent("'" + titulo.replace(/'/g, "''") + "'!A1:E" + rows.length) + '?valueInputOption=RAW', {
                 method: 'PUT', body: JSON.stringify({ majorDimension: 'ROWS', values: rows })
@@ -493,9 +492,9 @@
         async function guardarLocalYNube(mensaje) {
             localStorage.setItem('misSocios', JSON.stringify(socios));
             if (googleConectado) {
-                try { await guardarEnGoogleSheets(); mostrarMensaje(mensaje + ' y sincronizado con Google Sheets'); }
-                catch (e) { mostrarMensaje(mensaje + ', pero falló la sincronización'); alert('Los cambios quedaron guardados en este dispositivo, pero no en Google Sheets. Detalle: ' + e.message); }
-            } else { mostrarMensaje(mensaje); }
+                try { await guardarEnGoogleSheets(); mostrarMensaje('✅ ' + mensaje.replace(/^✅\s*/, '').replace(/^🗑️\s*/, '') + ' — sincronizado con Google Sheets (Hoja 1)'); }
+                catch (e) { mostrarMensaje('⚠️ Guardado solo en este celular; NO sincronizado'); alert('ATENCIÓN: los cambios quedaron solo en este celular; NO se guardaron en Google Sheets. Detalle: ' + e.message); }
+            } else { mostrarMensaje('⚠️ Guardado solo en este celular; Google Sheets no está conectado.'); }
         }
 
         function iniciar() {
@@ -677,7 +676,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = "ASOCIACION_SANTA_MARIA_respaldo_v6.2.json";
+            a.download = "ASOCIACION_SANTA_MARIA_respaldo_v6.3.json";
             a.click();
             mostrarMensaje('💾 Respaldo descargado correctamente');
         }
